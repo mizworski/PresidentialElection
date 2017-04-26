@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="../css/style.css" rel="stylesheet" type="text/css">
+    <title>Wybory Prezydenta 2000</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type='text/javascript' src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages': ['geochart']});
+        google.charts.setOnLoadCallback(drawRegionsMap);
+
+        function drawRegionsMap() {
+
+            var raw_data = [];
+
+            var single_element = [];
+
+            {% for wiersz in wyniki %}{% for el in wiersz %}{% if loop.index == 1 %}
+            single_element.push('/{{ el }}');
+            {% elif loop.index == 2 %}
+            single_element.push('{{ el }}');
+            {% elif loop.index == 3 %}
+            single_element.push('{{ el }}');
+            {% elif loop.index == 9 %}
+            single_element.push({{ el }});
+            raw_data.push(single_element);
+            single_element = [];
+            {%  endif %}{%  endfor %}{% endfor %}
+
+            var converted_data = [['Województwo', 'Poprarcie zwycięskiego kandydata', 'Domain']];
+
+            for (var i = 0; i < raw_data.length; i++) {
+                var new_el = [raw_data[i][1], 100 * raw_data[i][3] / raw_data[i][2], raw_data[i][0]];
+                converted_data.push(new_el);
+            }
+
+            var data = google.visualization.arrayToDataTable(converted_data);
+
+            var view = new google.visualization.DataView(data);
+            view.setColumns([0, 1]);
+
+            var options = {
+                region: 'PL',
+                displayMode: 'regions',
+                resolution: 'provinces',
+                datalessRegionColor: 'transparent',
+                legend: 'none'
+            };
+            var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+
+            var base_location = 'https://students.mimuw.edu.pl/~mi360968/AplikacjeZaliczeniowe1/app/output/';
+
+            google.visualization.events.addListener(chart, 'select', function () {
+                var selection = chart.getSelection();
+
+                window.location.href = '../output' + data.getValue(selection[0].row, 2) + '.html';
+            });
+
+            chart.draw(view, options);
+
+        }
+    </script>
+</head>
+<body>
+<div id="top">
+    <h1>Wybory Prezydenta 2000</h1>
+</div>
+<div id="tresc">
+    <div id="nawigacja">
+        <h3>Jesteś tutaj: <a href="main.html">Polska</a></h3>
+    </div>
+    <div id="wyniki_top">
+        <div id="wyniki_top_mapa">
+            <div id="regions_div"></div>
+        </div>
+        <div id="wyniki_top_zbiorcze">
+            <div id="wyniki_top_zbiorcze_gora">
+                <div>
+                    <h4>Zbiorcze statystyki głosowania</h4>
+                    <div>
+                        <div>
+                            <div>Liczba uprawnionych do głosowania</div>
+                            <div>{{ uprawnionych }}</div>
+                        </div>
+                        <div>
+                            <div>Liczba kart ważnych</div>
+                            <div>{{ kart_waznych }}</div>
+                        </div>
+                        <div>
+                            <div>Liczba głosów ważnych</div>
+                            <div>{{ glosow_waznych }}</div>
+                        </div>
+                        <div>
+                            <div>Liczba głosów nieważnych</div>
+                            <div>{{ glosow_niewaznych }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="wyniki_ogolne">
+        <h3>Wyniki wyborów</h3>
+        <div id="wyniki_ogolne_tabela">
+            <table class="wyniki">
+                <thead>
+                <tr>
+                    <th>Lp</th>
+                    <th>Imię i nazwisko</th>
+                    <th>Liczba oddanych głosów</th>
+                    <th>Wynik wyborczy</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for kandydat in kandydaci %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ kandydat['nazwa'] }}</td>
+                        <td>{{ kandydat['wynik_ilosc'] }}</td>
+                        <td>
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <div style="width:{{ kandydat['wynik_procent'] }}%;
+                                                    background-color: {{ kandydat['kolor'] }};"></div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>{{ kandydat['wynik_procent'] }}%</div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="wykres_slupkowy">
+        <div id="kontener_wykresu">
+            {% for kandydat in kandydaci %}
+                <div style="background-color: {{ kandydat['kolor'] }}; width: {{ kandydat['wynik_procent'] }}%"></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="wyniki_szczegolowe">
+        <div id="wyniki_szczegolowe_tabela">
+            <table class="wyniki">
+                <thead>
+                <tr>
+                    {% for label in labels %}
+                        <th>{{ label }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for wiersz in wyniki %}
+                    <tr>
+                        {% for kolumna in wiersz %}
+                            {% if loop.index == 1 %}
+                                <td><a href="{{ kolumna }}.html">
+                                    {% elif loop.index == 2 %}
+                                    {{ kolumna }}</a></td>
+                            {% else %}
+                                <td>{{ kolumna }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+body {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: 'Open Sans', sans-serif;
+    vertical-align: baseline;
+}
+
+@media only screen and (max-width: 1000px) {
+    div#wyniki_ogolne_tabela tbody > tr > td:nth-last-child(1) {
+        display: none;
+    }
+
+    div#wyniki_ogolne_tabela thead > tr > th:nth-last-child(1) {
+        display: none;
+    }
+}
+
+h1, h2, h3, h4 {
+    margin: 0;
+    padding: 0 0 20px 0;
+    font-weight: bold;
+}
+
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+div#top {
+    left: 0;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    background-color: cornflowerblue;
+
+}
+
+div#nawigacja {
+    padding: 40px 0;
+}
+
+div#top h1 {
+    padding: 30px 0;
+    color: #ffffff;
+    outline: 0;
+    font-size: 20pt;
+    font-weight: normal;
+    box-shadow: 0 0 10px #000000;
+}
+
+div#tresc {
+    width: 72%;
+    padding: 0 14% 3% 14%;
+}
+
+div#wyniki_top {
+    padding: 30px 0;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+
+    -webkit-flex-flow: row wrap;
+}
+
+div#wyniki_top svg path[fill^='none'] {
+    stroke-width: 0px;
+}
+
+div#wyniki_top > div {
+    padding: 20px 0;
+}
+
+div#wyniki_top_mapa {
+    flex-grow: 3;
+    text-align: left;
+}
+
+div#wyniki_top_mapa > div {
+    height: auto;
+    min-width: 300px;
+}
+
+div#wyniki_top_zbiorcze {
+    flex-grow: 7;
+}
+
+div#wyniki_top_zbiorcze_gora > div:nth-child(1) > div {
+    display: table;
+    font-size: 14px;
+    width: 100%;
+}
+
+div#wyniki_top_zbiorcze_gora > div:nth-child(1) > div > div {
+    display: table-row;
+}
+
+div#wyniki_top_zbiorcze_gora > div:nth-child(1) > div > div > div {
+    display: table-cell;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 10px 0;
+}
+
+div#wyniki_top_zbiorcze_gora > div:nth-child(1) > div > div > div:nth-child(1) {
+    padding-right: 20px;
+}
+
+div#wyniki_top_zbiorcze_gora > div:nth-child(1) > div > div > div:nth-child(2) {
+    text-align: right;
+}
+
+div#wykres_slupkowy {
+    padding: 50px 0;
+}
+
+div#kontener_wykresu {
+    background-color: #f8edf0;
+    width: 100%;
+    height: 20px;
+
+    display: flex;
+    flex-wrap: nowrap
+}
+
+div#kontener_wykresu > div {
+    height: 20px;
+    padding: 0;
+}
+
+div#wyniki_ogolne_tabela {
+    width: 100%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+div#wyniki_szczegolowe_tabela {
+    width: 100%;
+    display: inline-block;
+    vertical-align: top;
+    overflow: scroll;
+    overflow-y: hidden;
+
+}
+
+.wyniki {
+    margin: auto;
+    border-spacing: 0;
+    width: 100%;
+
+    text-align: center;
+    table-layout: fixed;
+}
+
+.wyniki > thead {
+    background-color: #f4f4f4;
+}
+
+.wyniki > thead > tr > th {
+    background-color: #f4f4f4;
+    font-size: 13px;
+    padding: 10px;
+    border-bottom: 1px solid #e1e1e1;
+    text-align: left;
+    width: 100px;
+}
+
+div#wyniki_ogolne_tabela > table > thead > tr > th:nth-child(1) {
+    border-left: 1px solid #e1e1e1;
+    width: 30px;
+}
+
+div#wyniki_ogolne_tabela > table > thead > tr > th:nth-child(2) {
+    width: 100px;
+}
+
+div#wyniki_ogolne_tabela > table > tbody > tr > td:nth-child(1) {
+    border-left: 1px solid #e1e1e1;
+    width: 30px;
+}
+
+div#wyniki_ogolne_tabela > table > tbody > tr > td:nth-child(2) {
+    width: 100px;
+}
+
+div#wyniki_szczegolowe_tabela thead > tr > th:nth-child(1) {
+    border-left: 1px solid #e1e1e1;
+    width: 180px;
+}
+
+div#wyniki_szczegolowe_tabela tbody > tr > td:nth-child(1) {
+    border-left: 1px solid #e1e1e1;
+    width: 180px;
+}
+
+.wyniki > tbody tr {
+    display: table-row;
+    vertical-align: inherit;
+}
+
+.wyniki > tbody > tr > td {
+    border-bottom: 1px solid #e1e1e1;
+    font-size: 13px;
+    padding: 10px;
+    text-align: left;
+    width: 100px;
+}
+
+.wyniki > tbody > tr > td:nth-last-child(1) {
+    border-right: 1px solid #e1e1e1;
+}
+
+.wyniki > tbody > tr > td > table tr td:nth-child(1) div {
+    background-color: #f8edf0;
+    width: 100%;
+    height: 20px;
+}
+
+.wyniki > tbody > tr > td > table tr td:nth-child(2) {
+    width: 20%;
+    padding: 0 0 0 10px;
+    text-align: right;
+}
+
+.wyniki > tbody > tr > td > table tr td:nth-child(2) > div {
+    width: 50px;
+}
+
