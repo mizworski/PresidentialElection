@@ -6,7 +6,7 @@ wyniki_cale = {}
 wyniki_woj = {}
 wyniki_okregu = {}
 wyniki_gminy = {}
-wyniki_obw = {}
+circuit_results = {}
 
 poziomy = ['Cała', 'Województwo', 'Okręg', 'Gmina', 'Obwód', ' ']
 dane_poziomu = {
@@ -14,7 +14,7 @@ dane_poziomu = {
     'Województwo': wyniki_woj,
     'Okręg': wyniki_okregu,
     'Gmina': wyniki_gminy,
-    'Obwód': wyniki_obw,
+    'Obwód': circuit_results,
     ' ': {}
 }
 
@@ -25,4 +25,4 @@ FILES_LOCATION = ""  # lokalizacja plików ze stronami w systemie - podawana prz
 TABLE_TMPL_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + "/table_tmpl.js"
 MAP_TMPL_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + "/map_tmpl.js"
 HTML_TMPL_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + "/html_tmpl.html"
-CSS_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + 'prezydent.css'
+CSS_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + 'prezydent.static'

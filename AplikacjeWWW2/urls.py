@@ -15,7 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+import elections.views
 
 urlpatterns = [
+    # url(r'^$', ),
+    url(r'^$', elections.views.index, name="Polska"),
     url(r'^admin/', admin.site.urls),
 ]

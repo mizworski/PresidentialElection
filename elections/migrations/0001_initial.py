@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(editable=False, max_length=50)),
                 ('desc', models.CharField(max_length=200)),
             ],
-            bases=(models.Model, elections.models.WynNizej),
+            bases=(models.Model, elections.models.ElectoralUnit),
         ),
         migrations.CreateModel(
             name='Community',
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 ('ballots_issued', models.IntegerField()),
                 ('circuit', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='elections.Circuit')),
             ],
-            bases=(models.Model, elections.models.WynNizej),
+            bases=(models.Model, elections.models.ElectoralUnit),
         ),
         migrations.CreateModel(
             name='Province',
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
             ],
-            bases=(models.Model, elections.models.WynNizej),
+            bases=(models.Model, elections.models.ElectoralUnit),
         ),
         migrations.CreateModel(
             name='ResultsInCommunity',

@@ -6,12 +6,12 @@ from django.db.models import Sum
 from django.db import transaction
 
 
-class WynNizej():
+class ElectoralUnit():
     def descendants(self):
         return []
 
     @transaction.atomic
-    def wyniki_nizej(self):
+    def results_from_descendants(self):
         return list(map(lambda res: (res, res.results()), self.descendants()))
 
     def __unicode(self):
@@ -19,14 +19,14 @@ class WynNizej():
 
 
 class Candidate(models.Model):
-    first_name = models.CharField(max_length=50, editable=False)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=32, editable=False)
+    last_name = models.CharField(max_length=32)
 
     def __str__(self):
         return self.first_name + " " + self.last_name
 
 
-class Country(WynNizej):
+class Country(ElectoralUnit):
     name = "Polska"
 
     @transaction.atomic
@@ -46,16 +46,16 @@ class Country(WynNizej):
         )
 
 
-class Province(models.Model, WynNizej):
-    name = models.CharField(max_length=50)
+class Province(models.Model, ElectoralUnit):
+    name = models.CharField(max_length=32)
 
     def __str__(self):
         return "Województwo " + self.name
 
     @transaction.atomic
     def results(self):
-        return Candidate.objects.filter(resultincommunity__community__circuit__province=self). \
-            annotate(result=Sum('resultincommunity__result'))
+        return Candidate.objects.filter(resultsincommunity__community__circuit__province=self). \
+            annotate(result=Sum('resultsincommunity__result'))
 
     def descendants(self):
         return Circuit.objects.filter(province=self)
@@ -70,18 +70,18 @@ class Province(models.Model, WynNizej):
         )
 
 
-class Circuit(models.Model, WynNizej):
+class Circuit(models.Model, ElectoralUnit):
     province = models.ForeignKey(Province, on_delete=models.CASCADE, editable=False)
-    name = models.CharField(editable=False, max_length=50)
-    desc = models.CharField(max_length=200)
+    name = models.CharField(editable=False, max_length=32)
+    desc = models.CharField(max_length=128)
 
     def __str__(self):
         return "Okręg " + str(self.name)
 
     @transaction.atomic
     def results(self):
-        return Candidate.objects.filter(resultincommunity__community__circuit=self). \
-            annotate(result=Sum('resultincommunity__result'))
+        return Candidate.objects.filter(resultsincommunity__community__circuit_id=self). \
+            annotate(result=Sum('resultsincommunity__result'))
 
     def descendants(self):
         return Community.objects.filter(okreg=self)
@@ -96,9 +96,9 @@ class Circuit(models.Model, WynNizej):
         )
 
 
-class Community(models.Model, WynNizej):
+class Community(models.Model, ElectoralUnit):
     circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=32)
 
     votes_invalid = models.IntegerField()
     votes_cast = models.IntegerField()
@@ -111,8 +111,8 @@ class Community(models.Model, WynNizej):
 
     @transaction.atomic
     def results(self):
-        return Candidate.objects.filter(resultincommunity_community=self). \
-                        annotate(result=Sum('resultincommunity__result'))
+        return Candidate.objects.filter(resultsincommunity__community=self). \
+                        annotate(result=Sum('resultsincommunity__result'))
 
     def general(self):
         return {

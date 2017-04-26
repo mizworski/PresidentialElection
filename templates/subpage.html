@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link href="../css/style.css" rel="stylesheet" type="text/css">
+    {% load static %}
+    <link href="{% static 'style.css' %}" rel="stylesheet" type="text/css">
     <title>Wybory Prezydenta 2000</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -12,11 +13,13 @@
 </div>
 <div id="tresc">
     <div id="nawigacja">
+    {% comment %}
         <h3>Jesteś tutaj: <a href="main.html">Polska</a>
             {% for el in jednostki %}
                 | <a href="{{ el[0] }}.html">{{ el[1] }}</a>
             {% endfor %}
         </h3>
+    {% endcomment %}
     </div>
     <div id="wyniki_top">
         <div id="wyniki_top_zbiorcze">
@@ -61,25 +64,26 @@
                 {% for kandydat in kandydaci %}
                     <tr>
                         <td>{{ loop.index }}</td>
-                        <td>{{ kandydat['nazwa'] }}</td>
-                        <td>{{ kandydat['wynik_ilosc'] }}</td>
+                        <td>{{ kandydat.0 }}</td>
+                        <td>{{ kandydat.1 }}</td>
                         <td>
                             <table>
                                 <tbody>
                                 <tr>
                                     <td>
                                         <div>
-                                            <div style="width:{{ kandydat['wynik_procent'] }}%;
-                                                    background-color: {{ kandydat['kolor'] }};"></div>
+                                            <div style="width:{{ kandydat.2 }}%;
+                                                    background-color: {{ kandydat.3 }};"></div>
                                         </div>
                                     </td>
                                     <td>
-                                        <div>{{ kandydat['wynik_procent'] }}%</div>
+                                        <div>{{ kandydat.2 }}%</div>
                                     </td>
                                 </tr>
                                 </tbody>
                             </table>
                         </td>
+
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -90,7 +94,7 @@
     <div id="wykres_slupkowy">
         <div id="kontener_wykresu">
             {% for kandydat in kandydaci %}
-                <div style="background-color: {{ kandydat['kolor'] }}; width: {{ kandydat['wynik_procent'] }}%"></div>
+                <div style="background-color: {{ kandydat.3 }}; width: {{ kandydat.2 }}%"></div>
             {% endfor %}
         </div>
     </div>

@@ -34,8 +34,8 @@ def row_to_dicts_entries_keys(csv_row):
     for key, val in csv_row.items():
         csv_row[key] = int(val)
 
-    set_in_dict(wyniki_obw, [woj, nr_okregu, nazwa_gminy], csv_row)
-    set_in_dict(wyniki_obw, [woj, nr_okregu, nazwa_gminy, "Wydane karty"], ballots_issued)
+    set_in_dict(circuit_results, [woj, nr_okregu, nazwa_gminy], csv_row)
+    set_in_dict(circuit_results, [woj, nr_okregu, nazwa_gminy, "Wydane karty"], ballots_issued)
     for key, val in csv_row.items():
         update_dict(wyniki_gminy, [woj, nr_okregu, nazwa_gminy, key], val)
         update_dict(wyniki_okregu, [woj, nr_okregu, key], val)
@@ -53,13 +53,14 @@ def row_to_dicts_entries_values(woj, csv_row):
     for key, val in csv_row.items():
         csv_row[key] = int(val)
 
-    set_in_dict(wyniki_obw, [woj, nr_okregu, nazwa_gminy], csv_row)
+    set_in_dict(circuit_results, [woj, nr_okregu, nazwa_gminy], csv_row)
 
     for key, val in csv_row.items():
         update_dict(wyniki_gminy, [woj, nr_okregu, nazwa_gminy, key], val)
         update_dict(wyniki_okregu, [woj, nr_okregu, key], val)
         update_dict(wyniki_woj, [woj, key], val)
         update_dict(wyniki_cale, [key], val)
+
 
 general_data_cols = ["Głosy nieważne", "Głosy oddane", "Głosy ważne", "Uprawnieni", "Wydane karty"]
 
@@ -68,38 +69,39 @@ def insert_into_db():
     for col_label in wyniki_cale.keys():
         if col_label not in general_data_cols:
             entry = col_label.rsplit(None, 1)
-            c = Candidate(first_name=entry[0], last_name=entry[1])
-            c.save()
+            candidate = Candidate(first_name=entry[0], last_name=entry[1])
+            candidate.save()
 
-    for woj, wyn_okr in wyniki_obw.items():
-        w = Province(name=woj)
-        w.save()
+    for province, circuit_res in circuit_results.items():
+        province = Province(name=province)
+        province.save()
 
-        for okr, wyn_gm in wyn_okr.items():
-            o = Circuit(province=w, name=okr)
-            o.save()
+        for circuit, community_res in circuit_res.items():
+            circuit = Circuit(province=province, name=circuit)
+            circuit.save()
 
-            for gm, wyn_w_gm in wyn_gm.items():
-                g = Community(circuit=o, name=gm,
-                              votes_invalid=wyn_w_gm["Głosy nieważne"],
-                              votes_cast=wyn_w_gm["Głosy oddane"],
-                              votes_valid=wyn_w_gm["Głosy ważne"],
-                              entitled_to_vote=wyn_w_gm["Uprawnieni"],
-                              ballots_issued=wyn_w_gm["Wydane karty"]
-                              )
-                g.save()
+            for community, cand_res_in_comm in community_res.items():
+                comm = Community(circuit=circuit, name=community,
+                                 votes_invalid=cand_res_in_comm["Głosy nieważne"],
+                                 votes_cast=cand_res_in_comm["Głosy oddane"],
+                                 votes_valid=cand_res_in_comm["Głosy ważne"],
+                                 entitled_to_vote=cand_res_in_comm["Uprawnieni"],
+                                 ballots_issued=cand_res_in_comm["Wydane karty"]
+                                 )
+                comm.save()
 
-                for kand_nazwa, wynik in wyn_w_gm.items():
-                    if kand_nazwa not in general_data_cols:
-                        kandydat = Candidate.objects.get(last_name=kand_nazwa.rsplit(None, 1)[1])
+                for cand, wynik in cand_res_in_comm.items():
+                    if cand not in general_data_cols:
+                        candidate = Candidate.objects.get(last_name=cand.rsplit(None, 1)[1])
 
-                        w_w_obw = ResultsInCommunity(community=g, candidate=kandydat, result=wynik)
-                        w_w_obw.save()
+                        res_in_comm = ResultsInCommunity(community=comm, candidate=candidate, result=wynik)
+                        res_in_comm.save()
+
 
 with open('data/pkw2000.csv') as csvfile:
-    spamreader = csv.DictReader(csvfile)
+    results = csv.DictReader(csvfile)
 
-    for row in spamreader:
+    for row in results:
         row_to_dicts_entries_keys(row)
 
     insert_into_db()

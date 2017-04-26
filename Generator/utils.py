@@ -57,7 +57,7 @@ def get_link(list_coords):
     """Create link from coordinate in dict."""
     retlink = BASE_LINK
     for i in range(len(list_coords)):
-        elements = get_from_dict(wyniki_obw, list_coords[:i])
+        elements = get_from_dict(circuit_results, list_coords[:i])
         retlink += order(list_coords[i], list(elements.keys()))
     return retlink
 
