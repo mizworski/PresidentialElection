@@ -18,7 +18,10 @@ from django.contrib import admin
 import elections.views
 
 urlpatterns = [
-    # url(r'^$', ),
-    url(r'^$', elections.views.index, name="Polska"),
+    url(r'^$', elections.views.index, kwargs={'arg': ''}),
+    url(r'^login/', elections.views.login),
+    url(r'^signup/', elections.views.signup),
+    url(r'^wyniki/Obwód(0)?(?P<arg>.*)', elections.views.index),
+    url(r'^wyniki/(?P<arg>.*)', elections.views.index),
     url(r'^admin/', admin.site.urls),
 ]

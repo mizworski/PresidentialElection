@@ -13,7 +13,7 @@
 </div>
 <div id="tresc">
     <div id="nawigacja">
-    {% comment %}
+        {% comment %}
         <h3>Jesteś tutaj: <a href="main.html">Polska</a>
             {% for el in jednostki %}
                 | <a href="{{ el[0] }}.html">{{ el[1] }}</a>
@@ -63,7 +63,7 @@
                 <tbody>
                 {% for kandydat in kandydaci %}
                     <tr>
-                        <td>{{ loop.index }}</td>
+                        <td>{{ forloop.counter }}</td>
                         <td>{{ kandydat.0 }}</td>
                         <td>{{ kandydat.1 }}</td>
                         <td>
@@ -99,34 +99,40 @@
         </div>
     </div>
 
-    <div id="wyniki_szczegolowe">
-        <div id="wyniki_szczegolowe_tabela">
-            <table class="wyniki">
-                <thead>
-                <tr>
-                    {% for label in labels %}
-                        <th>{{ label }}</th>
-                    {% endfor %}
-                </tr>
-                </thead>
-                <tbody>
-                {% for wiersz in wyniki %}
+    {% if czy_gmina %}
+
+    {% else %}
+        <div id="wyniki_szczegolowe">
+            <div id="wyniki_szczegolowe_tabela">
+                <table class="wyniki">
+                    <thead>
                     <tr>
-                        {% for kolumna in wiersz %}
-                            {% if forloop.counter == 1 %}
-                                <td><a href="{{ kolumna }}.html">
-                                    {% elif forloop.counter == 2 %}
-                                    {{ kolumna }}</a></td>
-                            {% else %}
-                                <td>{{ kolumna }}</td>
-                            {% endif %}
+                        {% for label in labels %}
+                            <th>{{ label }}</th>
                         {% endfor %}
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for wiersz in wyniki %}
+                        <tr>
+                            {% for kolumna in wiersz %}
+                                {% if forloop.counter == 1 %}
+                                    <td><a href="{{ kolumna }}">
+                                        {% elif forloop.counter == 2 %}
+                                        {{ kolumna }}</a></td>
+                                {% else %}
+                                    <td>{{ kolumna }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    {% endif %}
+
+
 </div>
 </body>
 </html>
