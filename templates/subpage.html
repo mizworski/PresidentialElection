@@ -47,33 +47,80 @@
         </h3>
     {% endcomment %}
     </div>
+    {% if czy_zalogowany is True %}
+        <form id="update_form" method="post" action="#"> {% csrf_token %}
+    {% endif %}
     <div id="wyniki_top">
         <div id="wyniki_top_zbiorcze">
             <div id="wyniki_top_zbiorcze_gora">
                 <div>
                     <h4>Zbiorcze statystyki głosowania</h4>
-                    <div>
+
+                    {% if czy_zalogowany is False or czy_gmina is False %}
                         <div>
-                            <div>Liczba uprawnionych do głosowania</div>
-                            <div>{{ uprawnionych }}</div>
+                            <div>
+                                <div>Liczba uprawnionych do głosowania</div>
+                                <div>{{ uprawnionych }}</div>
+                            </div>
+                            <div>
+                                <div>Liczba kart ważnych</div>
+                                <div>{{ kart_waznych }}</div>
+                            </div>
+                            <div>
+                                <div>Liczba głosów ważnych</div>
+                                <div>{{ glosow_waznych }}</div>
+                            </div>
+                            <div>
+                                <div>Liczba głosów nieważnych</div>
+                                <div>{{ glosow_niewaznych }}</div>
+                            </div>
                         </div>
+                    {% else %}
                         <div>
-                            <div>Liczba kart ważnych</div>
-                            <div>{{ kart_waznych }}</div>
+                            <div>
+                                <div>Liczba uprawnionych do głosowania</div>
+                                <div><input name="uprawnionych"
+                                            value="{{ uprawnionych }}"
+                                            type="text"
+                                            class="input"/>
+                                </div>
+                            </div>
+                            <div>
+                                <div>Liczba kart ważnych</div>
+                                <div><input name="kart_waznych"
+                                            value="{{ kart_waznych }}"
+                                            type="text"
+                                            class="input"/>
+                                </div>
+                            </div>
+                            <div>
+                                <div>Liczba głosów ważnych</div>
+                                <div><input name="glosow_waznych"
+                                            value="{{ glosow_waznych }}"
+                                            type="text"
+                                            class="input"/>
+                                </div>
+                            </div>
+                            <div>
+                                <div>Liczba głosów nieważnych</div>
+                                <div><input name="glosow_niewaznych"
+                                            value="{{ glosow_niewaznych }}"
+                                            type="text"
+                                            class="input"/>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <div>Liczba głosów ważnych</div>
-                            <div>{{ glosow_waznych }}</div>
-                        </div>
-                        <div>
-                            <div>Liczba głosów nieważnych</div>
-                            <div>{{ glosow_niewaznych }}</div>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
+
     </div>
+    {% if czy_zalogowany is True and czy_gmina is True %}
+        <div id="submit_button">
+            <button class="button" type="submit">Submit</button>
+        </div>
+    {% endif %}
     <div id="wyniki_ogolne">
         <h3>Wyniki wyborów</h3>
         <div id="wyniki_ogolne_tabela">
@@ -91,7 +138,17 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ kandydat.0 }}</td>
-                        <td>{{ kandydat.1 }}</td>
+                        <td>
+                            {% if czy_zalogowany is False or czy_gmina is False %}
+                                {{ kandydat.1 }}
+                            {% else %}
+                                <div><input name="{{ kandydat.0 }}"
+                                            value="{{ kandydat.1 }}"
+                                            type="text"
+                                            class="input"/>
+                                </div>
+                            {% endif %}
+                        </td>
                         <td>
                             <table>
                                 <tbody>
@@ -156,8 +213,15 @@
                 </table>
             </div>
         </div>
+
     {% endif %}
 
+    {% if czy_zalogowany is True and czy_gmina is True %}
+        <div id="submit_button">
+            <button class="button" type="submit">Submit</button>
+        </div>
+        </form>
+    {% endif %}
 
 </div>
 </body>

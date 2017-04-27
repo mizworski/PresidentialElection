@@ -1,7 +1,6 @@
-from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from elections.models import *
-from elections.forms import *
+from elections.my_forms import *
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -40,6 +39,9 @@ def name_to_href(str):
 
 def get_webpage_data(class_type, name):
     objects = class_type.objects.all().filter(name=name)
+
+
+
     elctoral_unit = objects[0]
     general_info = elctoral_unit.general()
 
@@ -54,7 +56,11 @@ def get_webpage_data(class_type, name):
     for res in candidates_results:
         name = res.first_name + ' ' + res.last_name
         votes = res.result
-        support = ('%.2f' % (100 * res.result / valid_votes)).replace(',', '.')
+        support_val = 100 * res.result / valid_votes
+        if support_val > 100:
+            support_val = 100
+        support = ('%.2f' % support_val).replace(',', '.')
+
         cand_names.append(name)
         cand_table_data.append([name, votes, support, colors[i]])
         i += 1
@@ -83,7 +89,7 @@ def get_webpage_data(class_type, name):
             name = 'Obwód' + name
 
         href = '/wyniki/' + name_to_href(name)
-        desc_data = [href, name, elctoral_unit.general()['votes_valid']]
+        desc_data = [href, name, descendant.general()['votes_valid']]
         for res in desc_res:
             votes = res.result
             desc_data.append(votes)
@@ -114,6 +120,8 @@ def index(request, arg):
     elif arg in [name_to_href(Circuit.objects.all()[i].name) for i in range(0, len(Circuit.objects.all()))]:
         data = get_webpage_data(Circuit, arg)
     else:
+        if request.method == 'POST':
+            update_community(request, arg)
         data = get_webpage_data(Community, arg)
 
     is_logged = request.user.is_authenticated()
@@ -123,12 +131,46 @@ def index(request, arg):
     return render(request, "subpage.html", data)
 
 
-# def login(request):
-#     return render(request, "login.html", locals())
+def update_community(request, comm_name):
+    cands = Candidate.objects.all()
+    cands_names = [candidate.first_name + ' ' + candidate.last_name for candidate in cands]
+    stats = [
+        'uprawnionych',
+        'kart_waznych',
+        'glosow_waznych',
+        'glosow_niewaznych'
+    ]
 
+    labels = stats + cands_names
 
-# def signup(request):
-#     return render(request, "signup.html", locals())
+    form = UpdateForm(labels, request.POST)
+    if form.is_valid():
+        comms = Community.objects.all().filter(name=comm_name)
+        comm_prev = comms[0]
+
+        comm = Community(ancestor=comm_prev.ancestor, name=comm_name,
+                         votes_invalid=form["glosow_niewaznych"].value(),
+                         votes_valid=form["glosow_waznych"].value(),
+                         votes_cast=form["glosow_waznych"].value() + form["glosow_niewaznych"].value(),
+                         entitled_to_vote=form["uprawnionych"].value(),
+                         ballots_issued=form["kart_waznych"].value()
+                         )
+        comm.save()
+
+        results_ids_to_delete = []
+        results_in_comms = ResultsInCommunity.objects.all().filter(community=comm_prev)
+        for res in results_in_comms:
+            cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
+            new_res = ResultsInCommunity(community=comm, candidate=res.candidate, result=form[cand_name].value())
+            temp = ResultsInCommunity.objects.all().filter(community=comm)
+            results_ids_to_delete.append(res.id)
+            temp = ResultsInCommunity.objects.all().filter(community=comm)
+            new_res.save()
+
+        for id in results_ids_to_delete:
+            ResultsInCommunity.objects.all().filter(id=id).delete()
+
+        Community.objects.all().filter(id=comm_prev.id).delete()
 
 
 def process_login_form(request):

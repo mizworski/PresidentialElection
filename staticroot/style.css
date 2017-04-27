@@ -24,7 +24,7 @@ h1, h2, h3, h4 {
 
 a {
     color: inherit;
-    text-decoration: inherit;
+    text-decoration: none;
 }
 
 div#top {
@@ -39,18 +39,38 @@ div#top {
     width: 100%;
     /*text-align: center;*/
     background-color: cornflowerblue;
+    box-shadow: 0 0 10px #000000;
 
 }
 
 div#title {
-    flex-grow: 7;
+    width: 72%;
     align-content: center;
     text-align: center;
-    background: #c00;
 }
 
-div#account_management {
-    flex-grow: 1;
+.side_box {
+    width: 14%;
+    display: flex;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    -webkit-flex-flow: row wrap;
+}
+.side_box div {
+    width: 100%;
+    align-content: center;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 90px;
+    border-left: 1px solid whitesmoke;
+}
+
+.side_box a {
+    color: #ffffff;
+    outline: 0;
+    width: 49%;
 }
 
 div#nawigacja {
@@ -63,7 +83,6 @@ div#top h1 {
     outline: 0;
     font-size: 20pt;
     font-weight: normal;
-    box-shadow: 0 0 10px #000000;
 }
 
 div#tresc {
@@ -209,6 +228,24 @@ div#wyniki_szczegolowe_tabela thead > tr > th:nth-child(1) {
 div#wyniki_szczegolowe_tabela tbody > tr > td:nth-child(1) {
     border-left: 1px solid #e1e1e1;
     width: 180px;
+}
+
+.button {
+    font-family: inherit;
+    border: 0;
+    padding: 10px;
+    width: 100px;
+    font-weight: bold;
+    font-size: 20px;
+    color: white;
+    background: #D90429;
+    float: right;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+
+    /*@media screen and (max-width: 600px) {*/
+    /*width: 100%*/
+    /*}*/
 }
 
 .wyniki > tbody tr {
