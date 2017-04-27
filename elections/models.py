@@ -38,13 +38,12 @@ class Candidate(models.Model):
         return self.first_name + " " + self.last_name
 
 
-class Country(ElectoralUnit):
-    name = "Polska"
-    descendant_type = Province
+class Country(models.Model, ElectoralUnit):
+    name = models.CharField(max_length=32)
 
     @transaction.atomic
     def results(self):
-        return Candidate.objects.all().annotate(result=Sum('resultincommunity__result'))
+        return Candidate.objects.all().annotate(result=Sum('resultsincommunity__result'))
 
     def descendants(self):
         return Province.objects.all()
@@ -61,7 +60,6 @@ class Country(ElectoralUnit):
 
 class Province(models.Model, ElectoralUnit):
     name = models.CharField(max_length=32)
-    descendant_type = Circuit
 
     def __str__(self):
         return "Województwo " + self.name
@@ -88,7 +86,6 @@ class Circuit(models.Model, ElectoralUnit):
     ancestor = models.ForeignKey(Province, on_delete=models.CASCADE, editable=False)
     name = models.CharField(editable=False, max_length=32)
     desc = models.CharField(max_length=128)
-    descendant_type = Community
 
     def __str__(self):
         return "Okręg " + str(self.name)
@@ -149,6 +146,6 @@ class ResultsInCommunity(models.Model):
         return 'Kandydat: {}, Gmina: {}. Okręg: {}, Województwo: {}'. \
             format(self.candidate,
                    self.community,
-                   self.community.circuit,
-                   self.community.circuit.ancestor
+                   self.community.ancestor,
+                   self.community.ancestor.ancestor
                    ).encode('ascii', errors='replace')

@@ -66,6 +66,9 @@ general_data_cols = ["Głosy nieważne", "Głosy oddane", "Głosy ważne", "Upra
 
 
 def insert_into_db():
+    polska = Country(name='Polska')
+    polska.save()
+
     for col_label in wyniki_cale.keys():
         if col_label not in general_data_cols:
             entry = col_label.rsplit(None, 1)

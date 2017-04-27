@@ -113,9 +113,9 @@
                 {% for wiersz in wyniki %}
                     <tr>
                         {% for kolumna in wiersz %}
-                            {% if loop.index == 1 %}
+                            {% if forloop.counter == 1 %}
                                 <td><a href="{{ kolumna }}.html">
-                                    {% elif loop.index == 2 %}
+                                    {% elif forloop.counter == 2 %}
                                     {{ kolumna }}</a></td>
                             {% else %}
                                 <td>{{ kolumna }}</td>

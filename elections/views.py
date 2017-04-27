@@ -24,12 +24,24 @@ colors = [
 ]
 
 
+def name_to_href(str):
+    ltrPL = "ŻÓŁĆĘŚĄŹŃżółćęśąźń "
+    ltrnoPL = "ZOLCESAZNzolcesazn-"
+
+    trantab = str.maketrans(ltrPL, ltrnoPL)
+
+    str = str.translate(trantab)
+    str = str.lower()
+
+    return str
+
+
 def get_webpage_data(class_type, name):
     objects = class_type.objects.all().filter(name=name)
-    object = objects[0]
-    general_info = object.general()
+    elctoral_unit = objects[0]
+    general_info = elctoral_unit.general()
 
-    candidates_results = object.results()
+    candidates_results = elctoral_unit.results()
 
     valid_votes = general_info['votes_valid']
 
@@ -52,15 +64,21 @@ def get_webpage_data(class_type, name):
     if class_type == Country:
         descendants = Province.objects.all()
     elif class_type == Province:
-        descendants = object.circuit_set.all()
+        descendants = elctoral_unit.circuit_set.all()
     elif class_type == Circuit:
-        descendants = object.communitys.all()
+        descendants = elctoral_unit.communitys.all()
 
     detailed_results = []
 
     for descendant in descendants:
         desc_res = descendant.results()
-        desc_data = [descendant.name, object.general()['votes_valid']]
+        name = descendant.name
+
+        if descendant.name.isdigit():
+            name = 'Obwód ' + descendant.name
+
+        href = name_to_href(name)
+        desc_data = [href, name, elctoral_unit.general()['votes_valid']]
         for res in desc_res:
             votes = res.result
             desc_data.append(votes)
