@@ -40,8 +40,6 @@ def name_to_href(str):
 def get_webpage_data(class_type, name):
     objects = class_type.objects.all().filter(name=name)
 
-
-
     elctoral_unit = objects[0]
     general_info = elctoral_unit.general()
 
@@ -162,9 +160,7 @@ def update_community(request, comm_name):
         for res in results_in_comms:
             cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
             new_res = ResultsInCommunity(community=comm, candidate=res.candidate, result=form[cand_name].value())
-            temp = ResultsInCommunity.objects.all().filter(community=comm)
             results_ids_to_delete.append(res.id)
-            temp = ResultsInCommunity.objects.all().filter(community=comm)
             new_res.save()
 
         for id in results_ids_to_delete:
