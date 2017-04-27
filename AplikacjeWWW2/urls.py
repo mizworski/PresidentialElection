@@ -19,8 +19,9 @@ import elections.views
 
 urlpatterns = [
     url(r'^$', elections.views.index, kwargs={'arg': ''}),
-    url(r'^login/', elections.views.login),
-    url(r'^signup/', elections.views.signup),
+    url(r'^login/', elections.views.process_login_form),
+    url(r'^signup/', elections.views.process_signup_form),
+    url(r'^logout/', elections.views.process_logout),
     url(r'^wyniki/Obwód(0)?(?P<arg>.*)', elections.views.index),
     url(r'^wyniki/(?P<arg>.*)', elections.views.index),
     url(r'^admin/', admin.site.urls),

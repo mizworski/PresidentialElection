@@ -1,8 +1,10 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from elections.models import *
-from django.template import Context
-from django.db import models
+from elections.forms import *
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 
 poziomy = ["province", "circuit", "community", ""]
 poziomy_id = ["province_id", "circuit_id", "community_id", ""]
@@ -114,12 +116,62 @@ def index(request, arg):
     else:
         data = get_webpage_data(Community, arg)
 
+    is_logged = request.user.is_authenticated()
+
+    data.update(czy_zalogowany=is_logged)
+
     return render(request, "subpage.html", data)
 
 
-def login(request):
-    return render(request, "login.html", locals())
+# def login(request):
+#     return render(request, "login.html", locals())
 
 
-def signup(request):
-    return render(request, "signup.html", locals())
+# def signup(request):
+#     return render(request, "signup.html", locals())
+
+
+def process_login_form(request):
+    if request.method == 'POST':
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+            # a file was sent
+            username = form['username'].value()
+            password = form['password'].value()
+            user = authenticate(username=username, password=password)
+            if user is None:
+                return render(request, 'login.html', {'form': RegisterForm(), 'msg': 'Niepoprawne dane logowania'})
+
+            login(request, user)
+            return redirect('/')
+
+    else:
+        form = LoginForm()
+        return render(request, 'login.html', {'form': form, 'msg': ''})
+
+
+def process_signup_form(request):
+    if request.method == 'POST':
+        form = RegisterForm(data=request.POST)
+        if form.is_valid():
+            # a file was sent
+            username = form['username'].value()
+            password = form['password'].value()
+            users = User.objects.filter(username=username)
+            if len(users) != 0:
+                return render(request, 'signup.html',
+                              {'form': RegisterForm(), 'msg': 'Użytkownik o podanym loginie już istnieje'})
+
+            user = User.objects.create_user(username, password=password)
+            user.save()
+            login(request, user)
+            return redirect('/')
+
+    else:
+        form = RegisterForm()
+        return render(request, 'signup.html', {'form': form, 'msg': ''})
+
+
+def process_logout(request):
+    logout(request)
+    return redirect('/')

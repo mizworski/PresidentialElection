@@ -24,7 +24,7 @@ h1, h2, h3, h4 {
 
 a {
     color: inherit;
-    text-decoration: none;
+    text-decoration: inherit;
 }
 
 div#top {
@@ -39,38 +39,18 @@ div#top {
     width: 100%;
     /*text-align: center;*/
     background-color: cornflowerblue;
-    box-shadow: 0 0 10px #000000;
 
 }
 
 div#title {
-    width: 72%;
+    flex-grow: 7;
     align-content: center;
     text-align: center;
+    background: #c00;
 }
 
-.side_box {
-    width: 14%;
-    display: flex;
-    display: -webkit-box;
-    display: -moz-box;
-    display: -ms-flexbox;
-    display: -webkit-flex;
-    -webkit-flex-flow: row wrap;
-}
-.side_box div {
-    width: 100%;
-    align-content: center;
-    text-align: center;
-    vertical-align: middle;
-    line-height: 90px;
-    border-left: 1px solid whitesmoke;
-}
-
-.side_box a {
-    color: #ffffff;
-    outline: 0;
-    width: 50%;
+div#account_management {
+    flex-grow: 1;
 }
 
 div#nawigacja {
@@ -83,6 +63,7 @@ div#top h1 {
     outline: 0;
     font-size: 20pt;
     font-weight: normal;
+    box-shadow: 0 0 10px #000000;
 }
 
 div#tresc {
