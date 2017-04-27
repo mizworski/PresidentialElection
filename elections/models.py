@@ -18,6 +18,18 @@ class ElectoralUnit():
         return self.__str__().encode('utf-8')
 
 
+class Province(models.Model):
+    pass
+
+
+class Circuit(models.Model):
+    pass
+
+
+class Community(models.Model):
+    pass
+
+
 class Candidate(models.Model):
     first_name = models.CharField(max_length=32, editable=False)
     last_name = models.CharField(max_length=32)
@@ -28,6 +40,7 @@ class Candidate(models.Model):
 
 class Country(ElectoralUnit):
     name = "Polska"
+    descendant_type = Province
 
     @transaction.atomic
     def results(self):
@@ -48,20 +61,21 @@ class Country(ElectoralUnit):
 
 class Province(models.Model, ElectoralUnit):
     name = models.CharField(max_length=32)
+    descendant_type = Circuit
 
     def __str__(self):
         return "Województwo " + self.name
 
     @transaction.atomic
     def results(self):
-        return Candidate.objects.filter(resultsincommunity__community__circuit__province=self). \
+        return Candidate.objects.filter(resultsincommunity__community__ancestor__ancestor=self). \
             annotate(result=Sum('resultsincommunity__result'))
 
     def descendants(self):
-        return Circuit.objects.filter(province=self)
+        return Circuit.objects.filter(ancestor=self)
 
     def general(self):
-        return Community.objects.filter(circuit__province=self).aggregate(
+        return Community.objects.filter(ancestor__ancestor=self).aggregate(
             votes_invalid=Sum('votes_invalid'),
             votes_cast=Sum('votes_cast'),
             votes_valid=Sum('votes_valid'),
@@ -71,23 +85,24 @@ class Province(models.Model, ElectoralUnit):
 
 
 class Circuit(models.Model, ElectoralUnit):
-    province = models.ForeignKey(Province, on_delete=models.CASCADE, editable=False)
+    ancestor = models.ForeignKey(Province, on_delete=models.CASCADE, editable=False)
     name = models.CharField(editable=False, max_length=32)
     desc = models.CharField(max_length=128)
+    descendant_type = Community
 
     def __str__(self):
         return "Okręg " + str(self.name)
 
     @transaction.atomic
     def results(self):
-        return Candidate.objects.filter(resultsincommunity__community__circuit_id=self). \
+        return Candidate.objects.filter(resultsincommunity__community__ancestor=self). \
             annotate(result=Sum('resultsincommunity__result'))
 
     def descendants(self):
-        return Community.objects.filter(okreg=self)
+        return Community.objects.filter(ancestor=self)
 
     def general(self):
-        return Community.objects.filter(gmina__okreg=self).aggregate(
+        return Community.objects.filter(ancestor=self).aggregate(
             votes_invalid=Sum('votes_invalid'),
             votes_cast=Sum('votes_cast'),
             votes_valid=Sum('votes_valid'),
@@ -97,7 +112,7 @@ class Circuit(models.Model, ElectoralUnit):
 
 
 class Community(models.Model, ElectoralUnit):
-    circuit = models.ForeignKey(Circuit, on_delete=models.CASCADE)
+    ancestor = models.ForeignKey(Circuit, on_delete=models.CASCADE)
     name = models.CharField(max_length=32)
 
     votes_invalid = models.IntegerField()
@@ -112,7 +127,7 @@ class Community(models.Model, ElectoralUnit):
     @transaction.atomic
     def results(self):
         return Candidate.objects.filter(resultsincommunity__community=self). \
-                        annotate(result=Sum('resultsincommunity__result'))
+            annotate(result=Sum('resultsincommunity__result'))
 
     def general(self):
         return {
@@ -135,5 +150,5 @@ class ResultsInCommunity(models.Model):
             format(self.candidate,
                    self.community,
                    self.community.circuit,
-                   self.community.circuit.province
+                   self.community.circuit.ancestor
                    ).encode('ascii', errors='replace')

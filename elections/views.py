@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from elections.models import *
 from django.template import Context
+from django.db import models
 
 poziomy = ["province", "circuit", "community", ""]
 poziomy_id = ["province_id", "circuit_id", "community_id", ""]
@@ -21,6 +22,7 @@ colors = [
     '#006400',
     '#800080'
 ]
+
 
 def get_webpage_data(class_type, name):
     objects = class_type.objects.all().filter(name=name)
@@ -45,6 +47,26 @@ def get_webpage_data(class_type, name):
 
     labels = ['Nazwa jednostki', 'Głosy ważne'] + cand_names
 
+    descendants = []
+
+    if class_type == Country:
+        descendants = Province.objects.all()
+    elif class_type == Province:
+        descendants = object.circuit_set.all()
+    elif class_type == Circuit:
+        descendants = object.communitys.all()
+
+    detailed_results = []
+
+    for descendant in descendants:
+        desc_res = descendant.results()
+        desc_data = [descendant.name, object.general()['votes_valid']]
+        for res in desc_res:
+            votes = res.result
+            desc_data.append(votes)
+
+        detailed_results.append(desc_data)
+
     data = {
         'uprawnionych': general_info['entitled_to_vote'],
         'kart_waznych': general_info['ballots_issued'],
@@ -52,7 +74,7 @@ def get_webpage_data(class_type, name):
         'glosow_niewaznych': general_info['votes_invalid'],
         'kandydaci': sorted(cand_table_data, key=lambda x: x[1], reverse=True),
         'labels': labels,
-        'wyniki': [[10, 1], [21, 2], [37, 3]]
+        'wyniki': detailed_results
     }
 
     return data

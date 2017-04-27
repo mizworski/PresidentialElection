@@ -77,11 +77,11 @@ def insert_into_db():
         province.save()
 
         for circuit, community_res in circuit_res.items():
-            circuit = Circuit(province=province, name=circuit)
+            circuit = Circuit(ancestor=province, name=circuit)
             circuit.save()
 
             for community, cand_res_in_comm in community_res.items():
-                comm = Community(circuit=circuit, name=community,
+                comm = Community(ancestor=circuit, name=community,
                                  votes_invalid=cand_res_in_comm["Głosy nieważne"],
                                  votes_cast=cand_res_in_comm["Głosy oddane"],
                                  votes_valid=cand_res_in_comm["Głosy ważne"],
