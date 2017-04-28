@@ -64,13 +64,27 @@ div#title {
     text-align: center;
     vertical-align: middle;
     line-height: 90px;
+}
+
+div#right_box div {
     border-left: 1px solid whitesmoke;
+}
+
+div#left_box div {
+    border-right: 1px solid whitesmoke;
 }
 
 .side_box a {
     color: #ffffff;
     outline: 0;
+}
+
+div#right_box a {
     width: 49%;
+}
+
+div#left_box a {
+    width: 99%;
 }
 
 div#nawigacja {
@@ -245,6 +259,10 @@ div#wyniki_szczegolowe_tabela tbody > tr > td:nth-child(1) {
 
 div#submit_button {
     text-align: right;
+}
+
+div#search_button {
+    padding: 20px 0 20px 0;
 }
 
 .button {

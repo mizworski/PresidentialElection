@@ -37,6 +37,51 @@ def name_to_href(str):
     return str
 
 
+def process_search(request):
+    data = {
+        'input_value': '',
+        'query_sent': False
+    }
+    if request.method == 'POST':
+        form = SearchForm(data=request.POST)
+        if form.is_valid():
+            cand_names = []
+
+            country = Country.objects.all()[0]
+            cres = country.results()
+
+            for res in cres:
+                cand_names.append(res.first_name + ' ' + res.last_name)
+
+            labels = ['Nazwa jednostki', 'Głosy ważne'] + cand_names
+
+            comm_name = form['community'].value()
+            comms = Community.objects.all().filter(name=comm_name)  # todo objects name like comm_name
+
+            detailed_results = []
+
+            for comm in comms:
+                desc_res = comm.results()
+                name = comm.name
+
+                href = '/wyniki/' + name_to_href(name)
+                desc_data = [href, name, comm.general()['votes_valid']]
+                for res in desc_res:
+                    votes = res.result
+                    desc_data.append(votes)
+
+                detailed_results.append(desc_data)
+
+            data = {
+                'labels': labels,
+                'wyniki': sorted(detailed_results, key=lambda x: x[1]),
+                'input_value': comm_name,
+                'query_sent': True
+            }
+
+    return render(request, "search.html", data)
+
+
 def get_webpage_data(class_type, name):
     objects = class_type.objects.all().filter(name=name)
 
@@ -167,6 +212,11 @@ def update_community(request, comm_name):
             ResultsInCommunity.objects.all().filter(id=id).delete()
 
         Community.objects.all().filter(id=comm_prev.id).delete()
+
+
+# def get_search_query(request):
+#     if request.method == 'GET':
+
 
 
 def process_login_form(request):

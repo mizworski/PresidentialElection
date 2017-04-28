@@ -2,6 +2,7 @@ from django import forms
 
 MAX_PASS_LENGTH = 32
 MAX_LOGIN_LENGTH = 32
+MAX_COMMUNITY_NAME_LENGTH = 32
 
 
 class RegisterForm(forms.Form):
@@ -12,6 +13,10 @@ class RegisterForm(forms.Form):
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=MAX_LOGIN_LENGTH)
     password = forms.CharField(max_length=MAX_PASS_LENGTH)
+
+
+class SearchForm(forms.Form):
+    community = forms.CharField(max_length=MAX_COMMUNITY_NAME_LENGTH)
 
 
 class UpdateForm(forms.Form):

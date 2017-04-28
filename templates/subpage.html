@@ -10,6 +10,11 @@
 <body>
 <div id="top">
     <div id="left_box" class="side_box">
+        <a href="/search">
+            <div>
+                search
+            </div>
+        </a>
     </div>
     <div id="title">
         <h1>Wybory Prezydenta 2000</h1>
@@ -40,9 +45,9 @@
 <div id="tresc">
     <div id="nawigacja">
         {% comment %}
-        <h3>Jesteś tutaj: <a href="main.html">Polska</a>
+        <h3>Jesteś tutaj: <a href="/">Polska</a>
             {% for el in jednostki %}
-                | <a href="{{ el[0] }}.html">{{ el[1] }}</a>
+                | <a href="{{ el[0] }}">{{ el[1] }}</a>
             {% endfor %}
         </h3>
     {% endcomment %}
@@ -118,7 +123,7 @@
     </div>
     {% if czy_zalogowany is True and czy_gmina is True %}
         <div id="submit_button">
-            <button class="button" type="submit">Submit</button>
+            <button class="button" type="submit">Wyślij</button>
         </div>
     {% endif %}
     <div id="wyniki_ogolne">
@@ -218,7 +223,7 @@
 
     {% if czy_zalogowany is True and czy_gmina is True %}
         <div id="submit_button">
-            <button class="button" type="submit">Submit</button>
+            <button class="button" type="submit">Wyślij</button>
         </div>
         </form>
     {% endif %}
