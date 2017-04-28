@@ -20,9 +20,5 @@ dane_poziomu = {
 
 DATA_FOLDER = 'data/'
 TEMPLATES_FOLDER = 'templates/'
-BASE_LINK = "0"  # relatywny link do strony domowej ( mapy polski )
-FILES_LOCATION = ""  # lokalizacja plików ze stronami w systemie - podawana przez użytkownika
-TABLE_TMPL_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + "/table_tmpl.js"
-MAP_TMPL_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + "/map_tmpl.js"
-HTML_TMPL_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + "/html_tmpl.html"
-CSS_FILE = os.getcwd() + '/' + TEMPLATES_FOLDER + 'prezydent.static'
+BASE_LINK = "0"
+FILES_LOCATION = ""

@@ -18,18 +18,6 @@ class ElectoralUnit():
         return self.__str__().encode('utf-8')
 
 
-class Province(models.Model):
-    pass
-
-
-class Circuit(models.Model):
-    pass
-
-
-class Community(models.Model):
-    pass
-
-
 class Candidate(models.Model):
     first_name = models.CharField(max_length=32, editable=False)
     last_name = models.CharField(max_length=32)
