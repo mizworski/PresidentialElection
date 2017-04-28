@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from elections.models import *
 from elections.my_forms import *
@@ -40,7 +41,8 @@ def name_to_href(str):
 def process_search(request):
     data = {
         'input_value': '',
-        'query_sent': False
+        'query_sent': False,
+        'czy_zalogowany': request.user.is_authenticated()
     }
     if request.method == 'POST':
         form = SearchForm(data=request.POST)
@@ -56,7 +58,7 @@ def process_search(request):
             labels = ['Nazwa jednostki', 'Głosy ważne'] + cand_names
 
             comm_name = form['community'].value()
-            comms = Community.objects.all().filter(name=comm_name)  # todo objects name like comm_name
+            comms = Community.objects.all().filter(name__contains=comm_name)
 
             detailed_results = []
 
@@ -64,7 +66,7 @@ def process_search(request):
                 desc_res = comm.results()
                 name = comm.name
 
-                href = '/wyniki/' + name_to_href(name)
+                href = '/wyniki/' + name_to_href(name) + '_' + comm.ancestor.name
                 desc_data = [href, name, comm.general()['votes_valid']]
                 for res in desc_res:
                     votes = res.result
@@ -76,19 +78,24 @@ def process_search(request):
                 'labels': labels,
                 'wyniki': sorted(detailed_results, key=lambda x: x[1]),
                 'input_value': comm_name,
-                'query_sent': True
+                'query_sent': True,
+                'czy_zalogowany': request.user.is_authenticated()
             }
 
     return render(request, "search.html", data)
 
 
 def get_webpage_data(class_type, name):
-    objects = class_type.objects.all().filter(name=name)
+    if class_type == Community:
+        args = name.split('_')
+        objects = class_type.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])
+    else:
+        objects = class_type.objects.all().filter(name=name)
 
-    elctoral_unit = objects[0]
-    general_info = elctoral_unit.general()
+    electoral_unit = objects[0]
+    general_info = electoral_unit.general()
 
-    candidates_results = elctoral_unit.results()
+    candidates_results = electoral_unit.results()
 
     valid_votes = general_info['votes_valid']
 
@@ -115,11 +122,34 @@ def get_webpage_data(class_type, name):
     if class_type == Country:
         descendants = Province.objects.all()
     elif class_type == Province:
-        descendants = elctoral_unit.circuit_set.all()
+        descendants = electoral_unit.circuit_set.all()
     elif class_type == Circuit:
-        descendants = elctoral_unit.community_set.all()
+        descendants = electoral_unit.community_set.all()
 
     detailed_results = []
+
+    hierarchy_nodes = []
+
+    if class_type != Country:
+        node = electoral_unit
+        name = node.name
+
+        if name.isdigit() and len(name) == 1:
+            name = '0' + name
+
+        if name.isdigit():
+            name = 'Obwód' + name
+        hierarchy_nodes.append(name)
+
+        while type(node) != Province:
+            node = node.ancestor
+            name = node.name
+            if name.isdigit() and len(name) == 1:
+                name = '0' + name
+
+            if name.isdigit():
+                name = 'Obwód' + name
+            hierarchy_nodes.append(name)
 
     for descendant in descendants:
         desc_res = descendant.results()
@@ -132,6 +162,10 @@ def get_webpage_data(class_type, name):
             name = 'Obwód' + name
 
         href = '/wyniki/' + name_to_href(name)
+
+        if class_type == Circuit:
+            href += '_' + descendant.ancestor.name
+
         desc_data = [href, name, descendant.general()['votes_valid']]
         for res in desc_res:
             votes = res.result
@@ -147,7 +181,8 @@ def get_webpage_data(class_type, name):
         'glosow_niewaznych': general_info['votes_invalid'],
         'kandydaci': sorted(cand_table_data, key=lambda x: x[1], reverse=True),
         'labels': labels,
-        'wyniki': sorted(detailed_results, key=lambda x: x[1])
+        'wyniki': sorted(detailed_results, key=lambda x: x[1]),
+        'jednostki': reversed(hierarchy_nodes)
     }
 
     return data
@@ -155,7 +190,6 @@ def get_webpage_data(class_type, name):
 
 def index(request, arg):
     arg = arg.replace('.html', '')
-    # test = [name_to_href(Province.objects.all()[i].name) for i in range(0, len(Province.objects.all()))]
     if arg == '':
         data = get_webpage_data(Country, 'Polska')
     elif arg in [name_to_href(Province.objects.all()[i].name) for i in range(0, len(Province.objects.all()))]:
@@ -188,10 +222,11 @@ def update_community(request, comm_name):
 
     form = UpdateForm(labels, request.POST)
     if form.is_valid():
-        comms = Community.objects.all().filter(name=comm_name)
+        args = comm_name.split('_')
+        comms = Community.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])
         comm_prev = comms[0]
 
-        comm = Community(ancestor=comm_prev.ancestor, name=comm_name,
+        comm = Community(ancestor=comm_prev.ancestor, name=args[0],
                          votes_invalid=form["glosow_niewaznych"].value(),
                          votes_valid=form["glosow_waznych"].value(),
                          votes_cast=form["glosow_waznych"].value() + form["glosow_niewaznych"].value(),
@@ -208,43 +243,43 @@ def update_community(request, comm_name):
             results_ids_to_delete.append(res.id)
             new_res.save()
 
-        for id in results_ids_to_delete:
-            ResultsInCommunity.objects.all().filter(id=id).delete()
+        for res_id in results_ids_to_delete:
+            ResultsInCommunity.objects.all().filter(id=res_id).delete()
 
         Community.objects.all().filter(id=comm_prev.id).delete()
-
-
-# def get_search_query(request):
-#     if request.method == 'GET':
-
 
 
 def process_login_form(request):
     if request.method == 'POST':
         form = LoginForm(data=request.POST)
         if form.is_valid():
-            # a file was sent
             username = form['username'].value()
             password = form['password'].value()
+            request_path = form['request_path'].value()
             user = authenticate(username=username, password=password)
             if user is None:
                 return render(request, 'login.html', {'form': RegisterForm(), 'msg': 'Niepoprawne dane logowania'})
 
             login(request, user)
-            return redirect('/')
+            return redirect(request_path)
 
     else:
         form = LoginForm()
-        return render(request, 'login.html', {'form': form, 'msg': ''})
+        data = {
+            'form': form,
+            'msg': '',
+            'request_path': request.META.get('HTTP_REFERER', '/')
+        }
+        return render(request, 'login.html', data)
 
 
 def process_signup_form(request):
     if request.method == 'POST':
         form = RegisterForm(data=request.POST)
         if form.is_valid():
-            # a file was sent
             username = form['username'].value()
             password = form['password'].value()
+            request_path = form['request_path'].value()
             users = User.objects.filter(username=username)
             if len(users) != 0:
                 return render(request, 'signup.html',
@@ -253,13 +288,18 @@ def process_signup_form(request):
             user = User.objects.create_user(username, password=password)
             user.save()
             login(request, user)
-            return redirect('/')
+            return redirect(request_path)
 
     else:
         form = RegisterForm()
-        return render(request, 'signup.html', {'form': form, 'msg': ''})
+        data = {
+            'form': form,
+            'msg': '',
+            'request_path': request.META.get('HTTP_REFERER', '/')
+        }
+        return render(request, 'signup.html', data)
 
 
 def process_logout(request):
     logout(request)
-    return redirect('/')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

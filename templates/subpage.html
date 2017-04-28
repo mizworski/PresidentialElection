@@ -44,13 +44,12 @@
 </div>
 <div id="tresc">
     <div id="nawigacja">
-        {% comment %}
-        <h3>Jesteś tutaj: <a href="/">Polska</a>
+        <h3>Jesteś tutaj:
+            <a href="/">Polska</a>
             {% for el in jednostki %}
-                | <a href="{{ el[0] }}">{{ el[1] }}</a>
+                | <a href="{{ el }}">{{ el }}</a>
             {% endfor %}
         </h3>
-    {% endcomment %}
     </div>
     {% if czy_zalogowany is True %}
         <form id="update_form" method="post" action="#"> {% csrf_token %}
