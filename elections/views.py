@@ -192,16 +192,16 @@ def get_webpage_data(class_type, name):
 def index(request, arg):
     arg = arg.replace('.html', '')
     metadata = {'name': arg}
-    if arg == '':
-        data = get_webpage_data(Country, 'Polska')
-    elif arg in [name_to_href(Province.objects.all()[i].name) for i in range(0, len(Province.objects.all()))]:
-        data = get_webpage_data(Province, arg)
-    elif arg in [name_to_href(Circuit.objects.all()[i].name) for i in range(0, len(Circuit.objects.all()))]:
-        data = get_webpage_data(Circuit, arg)
-    else:
-        if request.method == 'POST':
-            update_community(request, arg)
-        data = get_webpage_data(Community, arg)
+    # if arg == '':
+    #     data = get_webpage_data(Country, 'Polska')
+    # elif arg in [name_to_href(Province.objects.all()[i].name) for i in range(0, len(Province.objects.all()))]:
+    #     data = get_webpage_data(Province, arg)
+    # elif arg in [name_to_href(Circuit.objects.all()[i].name) for i in range(0, len(Circuit.objects.all()))]:
+    #     data = get_webpage_data(Circuit, arg)
+    # else:
+    #     if request.method == 'POST':
+    #         update_community(request, arg)
+    #     data = get_webpage_data(Community, arg)
 
     is_logged = request.user.is_authenticated()
 
@@ -366,8 +366,12 @@ def get_candidates_info(request, arg):
     i = 0
     for res in candidates_results:
         name = res.first_name + ' ' + res.last_name
-        votes = res.result
-        support_val = 100 * res.result / valid_votes
+        if res.result is None:
+            votes = 0
+        else:
+            votes = res.result
+
+        support_val = 100 * votes / valid_votes
         if support_val > 100:
             support_val = 100
         support = ('%.2f' % support_val).replace(',', '.')
