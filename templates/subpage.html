@@ -6,6 +6,11 @@
     <link href="{% static 'style.css' %}" rel="stylesheet" type="text/css">
     <title>Wybory Prezydenta 2000</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript">
+        unitName = '{{ name }}';
+        isLogged = '{{ czy_zalogowany }}';
+    </script>
+    <script type="text/javascript" src="/static/subpage.js"></script>
 </head>
 <body>
 <div id="top">
@@ -60,8 +65,9 @@
                 <div>
                     <h4>Zbiorcze statystyki głosowania</h4>
 
+                    <div id="zbiorcze_info">
+                        {% comment %}
                     {% if czy_zalogowany is False or czy_gmina is False %}
-                        <div>
                             <div>
                                 <div>Liczba uprawnionych do głosowania</div>
                                 <div>{{ uprawnionych }}</div>
@@ -78,9 +84,7 @@
                                 <div>Liczba głosów nieważnych</div>
                                 <div>{{ glosow_niewaznych }}</div>
                             </div>
-                        </div>
                     {% else %}
-                        <div>
                             <div>
                                 <div>Liczba uprawnionych do głosowania</div>
                                 <div><input name="uprawnionych"
@@ -113,8 +117,9 @@
                                             class="input"/>
                                 </div>
                             </div>
-                        </div>
                     {% endif %}
+                    {% endcomment %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,61 +133,7 @@
     <div id="wyniki_ogolne">
         <h3>Wyniki wyborów</h3>
         <div id="wyniki_ogolne_tabela">
-            <table class="wyniki">
-                <thead>
-                <tr>
-                    <th>Lp</th>
-                    <th>Imię i nazwisko</th>
-                    <th>Liczba oddanych głosów</th>
-                    <th>Wynik wyborczy</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for kandydat in kandydaci %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ kandydat.0 }}</td>
-                        <td>
-                            {% if czy_zalogowany is False or czy_gmina is False %}
-                                {{ kandydat.1 }}
-                            {% else %}
-                                <div><input name="{{ kandydat.0 }}"
-                                            value="{{ kandydat.1 }}"
-                                            type="text"
-                                            class="input"/>
-                                </div>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <td>
-                                        <div>
-                                            <div style="width:{{ kandydat.2 }}%;
-                                                    background-color: {{ kandydat.3 }};"></div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>{{ kandydat.2 }}%</div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </td>
-
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="wykres_slupkowy">
-        <div id="kontener_wykresu">
-            {% for kandydat in kandydaci %}
-                <div style="background-color: {{ kandydat.3 }}; width: {{ kandydat.2 }}%"></div>
-            {% endfor %}
+            <table class="wyniki" id="wyniki_ogolne_zawartosc"></table>
         </div>
     </div>
 
@@ -191,7 +142,8 @@
     {% else %}
         <div id="wyniki_szczegolowe">
             <div id="wyniki_szczegolowe_tabela">
-                <table class="wyniki">
+                <table class="wyniki" id="wyniki_szczegolowe_zawartosc">
+                    {%  comment %}
                     <thead>
                     <tr>
                         {% for label in labels %}
@@ -214,6 +166,7 @@
                         </tr>
                     {% endfor %}
                     </tbody>
+                    {% endcomment %}
                 </table>
             </div>
         </div>

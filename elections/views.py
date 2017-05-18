@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from elections.models import *
 from elections.my_forms import *
@@ -188,8 +188,10 @@ def get_webpage_data(class_type, name):
     return data
 
 
+# noinspection PyArgumentList
 def index(request, arg):
     arg = arg.replace('.html', '')
+    metadata = {'name': arg}
     if arg == '':
         data = get_webpage_data(Country, 'Polska')
     elif arg in [name_to_href(Province.objects.all()[i].name) for i in range(0, len(Province.objects.all()))]:
@@ -203,9 +205,14 @@ def index(request, arg):
 
     is_logged = request.user.is_authenticated()
 
-    data.update(czy_zalogowany=is_logged)
+    if '_' in arg:
+        is_community = True
+    else:
+        is_community = False
 
-    return render(request, "subpage.html", data)
+    metadata.update(czy_zalogowany=is_logged, czy_gmina=is_community)
+
+    return render(request, "subpage.html", metadata)
 
 
 def update_community(request, comm_name):
@@ -303,3 +310,72 @@ def process_signup_form(request):
 def process_logout(request):
     logout(request)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def get_electoral_unit(name):
+    if '_' in name:
+        args = name.split('_')
+        objects = Community.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])
+    elif name == '':
+        objects = Country.objects.all().filter(name=name)
+    elif name in [name_to_href(Province.objects.all()[i].name) for i in range(0, len(Province.objects.all()))]:
+        objects = Province.objects.all().filter(name=name)
+    elif name in [name_to_href(Circuit.objects.all()[i].name) for i in range(0, len(Circuit.objects.all()))]:
+        objects = Circuit.objects.all().filter(name=name)
+    return objects[0]
+
+
+def get_general_info(request, arg):
+    electoral_unit = get_electoral_unit(arg)
+    general_info = electoral_unit.general()
+
+    data = [
+        {
+            'label': 'Liczba uprawnionych do głosowania',
+            'short': 'uprawnionych',
+            'value': general_info['entitled_to_vote']
+        },
+        {
+            'label': 'Liczba kart ważnych',
+            'short': 'kart_waznych',
+            'value': general_info['ballots_issued']
+        },
+        {
+            'label': 'Liczba głosów ważnych',
+            'short': 'glosow_waznych',
+            'value': general_info['votes_valid']
+        },
+        {
+            'label': 'Liczba głosów nieważnych',
+            'short': 'glosow_niewaznych',
+            'value':  general_info['votes_invalid']
+        },
+    ]
+    return JsonResponse(data, safe=False)
+
+
+def get_candidates_info(request, arg):
+    electoral_unit = get_electoral_unit(arg)
+
+    general_info = electoral_unit.general()
+    candidates_results = electoral_unit.results()
+    valid_votes = general_info['votes_valid']
+
+    cand_table_data = []
+
+    i = 0
+    for res in candidates_results:
+        name = res.first_name + ' ' + res.last_name
+        votes = res.result
+        support_val = 100 * res.result / valid_votes
+        if support_val > 100:
+            support_val = 100
+        support = ('%.2f' % support_val).replace(',', '.')
+
+        cand_table_data.append([name, votes, support, colors[i]])
+        i += 1
+
+    general_labels = ['Lp', 'Imię i nazwisko', 'Liczba oddanych głosów', 'Wynik wyborczy']
+    data = {'cand_table': sorted(cand_table_data, key=lambda x: x[1], reverse=True),
+            'labels': general_labels}
+    return JsonResponse(data, safe=False)

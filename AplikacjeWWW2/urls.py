@@ -25,5 +25,11 @@ urlpatterns = [
     url(r'^search/', elections.views.process_search),
     url(r'^wyniki/Obwód(0)?(?P<arg>.*)', elections.views.index),
     url(r'^wyniki/(?P<arg>.*)', elections.views.index),
+
+    url(r'^api/kandydaci/Obwód(0)?(?P<arg>.*)', elections.views.get_candidates_info),
+    url(r'^api/kandydaci/(?P<arg>.*)', elections.views.get_candidates_info),
+    url(r'^api/zbiorcze/Obwód(0)?(?P<arg>.*)', elections.views.get_general_info),
+    url(r'^api/zbiorcze/(?P<arg>.*)', elections.views.get_general_info),
+
     url(r'^admin/', admin.site.urls),
 ]
