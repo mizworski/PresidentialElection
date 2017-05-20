@@ -33,6 +33,7 @@ urlpatterns = [
     url(r'^api/szczegolowe/Obwód(0)?(?P<arg>.*)', elections.views.get_detailed_info),
     url(r'^api/szczegolowe/(?P<arg>.*)', elections.views.get_detailed_info),
     url(r'^api/search/(?P<arg>.*)', elections.views.get_search_results),
+    url(r'^api/update', elections.views.update_community),
 
     url(r'^admin/', admin.site.urls),
 ]

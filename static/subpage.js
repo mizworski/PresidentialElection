@@ -111,6 +111,7 @@ function addGeneralInfo(serializedData, generalInfo) {
             inputField.value = value;
             inputField.type = 'text';
             inputField.class = 'input';
+            // inputField.id = 'in' + i;
 
             value_wrapper.appendChild(inputField);
             row_wrapper.appendChild(value_wrapper);
@@ -172,6 +173,23 @@ function addDetailedInfo(serializedData, detailedInfo) {
     detailedInfo.appendChild(tableBody);
 }
 
+
+function submitUpdate(generalInfo) {
+    var generalInfoInputs = generalInfo.getElementsByTagName('input');
+
+    var updateData = {'name': unitName};
+
+    for (var i = 0; i < generalInfoInputs.length; ++i) {
+        updateData[generalInfoInputs[i].name] = generalInfoInputs[i].value
+    }
+
+    var updateRequest = new XMLHttpRequest();
+
+
+    updateRequest.open("POST", "/api/update");
+    updateRequest.send(JSON.stringify(updateData));
+}
+
 window.addEventListener("load", function () {
     var generalInfo = document.getElementById("zbiorcze_info");
     var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
@@ -223,5 +241,10 @@ window.addEventListener("load", function () {
         detailedInfoRequest.open("GET", "/api/szczegolowe/" + unitName);
         detailedInfoRequest.send();
     }
+
+    var buttons = document.getElementsByTagName('button');
+    buttons.addEventListener('click', function () {
+        submitUpdate(generalInfo)
+    })
 
 });

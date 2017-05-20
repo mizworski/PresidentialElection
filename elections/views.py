@@ -1,7 +1,10 @@
+import json
+
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from elections.models import *
 from elections.my_forms import *
+from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -101,7 +104,9 @@ def index(request, arg):
     return render(request, "subpage.html", metadata)
 
 
-def update_community(request, comm_name):
+@csrf_exempt
+def update_community(request):
+    items = json.loads(request.body.decode("utf-8"))
     cands = Candidate.objects.all()
     cands_names = [candidate.first_name + ' ' + candidate.last_name for candidate in cands]
     stats = [
@@ -113,33 +118,31 @@ def update_community(request, comm_name):
 
     labels = stats + cands_names
 
-    form = UpdateForm(labels, request.POST)
-    if form.is_valid():
-        args = comm_name.split('_')
-        comms = Community.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])
-        comm_prev = comms[0]
+    args = items['name'].split('_')
+    comms = Community.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])
+    comm_prev = comms[0]
 
-        comm = Community(ancestor=comm_prev.ancestor, name=args[0],
-                         votes_invalid=form["glosow_niewaznych"].value(),
-                         votes_valid=form["glosow_waznych"].value(),
-                         votes_cast=form["glosow_waznych"].value() + form["glosow_niewaznych"].value(),
-                         entitled_to_vote=form["uprawnionych"].value(),
-                         ballots_issued=form["kart_waznych"].value()
-                         )
-        comm.save()
+    comm = Community(ancestor=comm_prev.ancestor, name=args[0],
+                     votes_invalid=items["glosow_niewaznych"],
+                     votes_valid=items["glosow_waznych"],
+                     votes_cast=items["glosow_waznych"] + items["glosow_niewaznych"],
+                     entitled_to_vote=items["uprawnionych"],
+                     ballots_issued=items["kart_waznych"]
+                     )
+    comm.save()
 
-        results_ids_to_delete = []
-        results_in_comms = ResultsInCommunity.objects.all().filter(community=comm_prev)
-        for res in results_in_comms:
-            cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
-            new_res = ResultsInCommunity(community=comm, candidate=res.candidate, result=form[cand_name].value())
-            results_ids_to_delete.append(res.id)
-            new_res.save()
-
-        for res_id in results_ids_to_delete:
-            ResultsInCommunity.objects.all().filter(id=res_id).delete()
-
-        Community.objects.all().filter(id=comm_prev.id).delete()
+    # results_ids_to_delete = []
+    # results_in_comms = ResultsInCommunity.objects.all().filter(community=comm_prev)
+    # for res in results_in_comms:1
+    #     cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
+    #     new_res = ResultsInCommunity(community=comm, candidate=res.candidate, result=form[cand_name])
+    #     results_ids_to_delete.append(res.id)
+    #     new_res.save()
+    #
+    # for res_id in results_ids_to_delete:
+    #     ResultsInCommunity.objects.all().filter(id=res_id).delete()
+    #
+    # Community.objects.all().filter(id=comm_prev.id).delete()
 
 
 def process_login_form(request):

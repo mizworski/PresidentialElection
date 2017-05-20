@@ -49,55 +49,53 @@
     </div>
 </div>
 <div id="tresc">
-    <div id="nawigacja">
-        <h3>Jesteś tutaj:
-            <a href="/">Polska</a>
-            {% for el in jednostki %}
-                | <a href="{{ el }}">{{ el }}</a>
-            {% endfor %}
-        </h3>
-    </div>
-    {% if czy_zalogowany is True %}
-        <form id="update_form" method="post" action="#"> {% csrf_token %}
-    {% endif %}
-    <div id="wyniki_top">
-        <div id="wyniki_top_zbiorcze">
-            <div id="wyniki_top_zbiorcze_gora">
-                <div>
-                    <h4>Zbiorcze statystyki głosowania</h4>
-                    <div id="zbiorcze_info"></div>
+    <form action="" method="POST">
+        {% csrf_token %}
+        <div id="nawigacja">
+            <h3>Jesteś tutaj:
+                <a href="/">Polska</a>
+                {% for el in jednostki %}
+                    | <a href="{{ el }}">{{ el }}</a>
+                {% endfor %}
+            </h3>
+        </div>
+        <div id="wyniki_top">
+            <div id="wyniki_top_zbiorcze">
+                <div id="wyniki_top_zbiorcze_gora">
+                    <div>
+                        <h4>Zbiorcze statystyki głosowania</h4>
+                        <div id="zbiorcze_info"></div>
+                    </div>
                 </div>
+            </div>
+
+        </div>
+        {% if czy_zalogowany is True and czy_gmina is True %}
+            <div id="submit_button">
+                <button class="button" type="submit">Wyślij</button>
+            </div>
+        {% endif %}
+
+        <div id="wyniki_ogolne">
+            <h3>Wyniki wyborów</h3>
+            <div id="wyniki_ogolne_tabela">
+                <table class="wyniki" id="wyniki_ogolne_zawartosc"></table>
             </div>
         </div>
 
-    </div>
-    {% if czy_zalogowany is True and czy_gmina is True %}
-        <div id="submit_button">
-            <button class="button" type="submit">Wyślij</button>
+
+        <div id="wyniki_szczegolowe">
+            <div id="wyniki_szczegolowe_tabela">
+                <table class="wyniki" id="wyniki_szczegolowe_zawartosc"></table>
+            </div>
         </div>
-    {% endif %}
 
-    <div id="wyniki_ogolne">
-        <h3>Wyniki wyborów</h3>
-        <div id="wyniki_ogolne_tabela">
-            <table class="wyniki" id="wyniki_ogolne_zawartosc"></table>
-        </div>
-    </div>
-
-
-    <div id="wyniki_szczegolowe">
-        <div id="wyniki_szczegolowe_tabela">
-            <table class="wyniki" id="wyniki_szczegolowe_zawartosc"></table>
-        </div>
-    </div>
-
-    {% if czy_zalogowany is True and czy_gmina is True %}
-        <div id="submit_button">
-            <button class="button" type="submit">Wyślij</button>
-        </div>
-        </form>
-    {% endif %}
-
+        {% if czy_zalogowany is True and czy_gmina is True %}
+            <div id="submit_button">
+                <button class="button" type="submit">Wyślij</button>
+            </div>
+        {% endif %}
+    </form>
 </div>
 </body>
 </html>
