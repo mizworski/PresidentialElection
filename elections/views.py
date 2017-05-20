@@ -130,6 +130,7 @@ def update_community(request):
                      ballots_issued=items["kart_waznych"]
                      )
     comm.save()
+    Community.objects.all().filter(id=comm_prev.id).delete()
 
     # results_ids_to_delete = []
     # results_in_comms = ResultsInCommunity.objects.all().filter(community=comm_prev)

@@ -243,8 +243,12 @@ window.addEventListener("load", function () {
     }
 
     var buttons = document.getElementsByTagName('button');
-    buttons.addEventListener('click', function () {
-        submitUpdate(generalInfo)
-    })
+
+    for (var i = 0; i < buttons.length; ++i) {
+        buttons[i].addEventListener('click', function () {
+            submitUpdate(generalInfo)
+        })
+    }
+
 
 });
