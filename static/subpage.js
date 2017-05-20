@@ -153,8 +153,8 @@ function addDetailedInfo(serializedData, detailedInfo) {
 
         var unit_name_column = document.createElement("td");
         var unit_name_link = document.createElement("a");
-        unit_name_link.href=electoral_unit_results[0];
-        unit_name_link.innerHTML=electoral_unit_results[1];
+        unit_name_link.href = electoral_unit_results[0];
+        unit_name_link.innerHTML = electoral_unit_results[1];
         unit_name_column.appendChild(unit_name_link);
         table_row.appendChild(unit_name_column);
 
@@ -175,7 +175,13 @@ function addDetailedInfo(serializedData, detailedInfo) {
 window.addEventListener("load", function () {
     var generalInfo = document.getElementById("zbiorcze_info");
     var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
-    var results_detailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+    var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+
+    /// Candidates results
+    var storedCandidatesResults = localStorage.getItem("candidates" + unitName);
+    if (storedCandidatesResults !== null) {
+        addCandidatesResults(storedCandidatesResults, candidatesResults);
+    }
 
     var candidatesInfoRequest = new XMLHttpRequest();
     candidatesInfoRequest.addEventListener("load", function () {
@@ -186,6 +192,12 @@ window.addEventListener("load", function () {
     candidatesInfoRequest.open("GET", "/api/kandydaci/" + unitName);
     candidatesInfoRequest.send();
 
+    /// General info
+    var storedGeneralInfo = localStorage.getItem("general" + unitName);
+    if (storedGeneralInfo !== null) {
+        addGeneralInfo(storedGeneralInfo, generalInfo);
+    }
+
     var generalInfoRequest = new XMLHttpRequest();
     generalInfoRequest.addEventListener("load", function () {
         addGeneralInfo(this.responseText, generalInfo);
@@ -195,23 +207,21 @@ window.addEventListener("load", function () {
     generalInfoRequest.open("GET", "/api/zbiorcze/" + unitName);
     generalInfoRequest.send();
 
+    /// Detailed info
     if (isCommunity === 'False') {
+        var storedDetailedInfo = localStorage.getItem("detailed" + unitName);
+        if (storedDetailedInfo !== null) {
+            addDetailedInfo(storedDetailedInfo, resultsDetailed);
+        }
 
         var detailedInfoRequest = new XMLHttpRequest();
         detailedInfoRequest.addEventListener("load", function () {
-            addDetailedInfo(this.responseText, results_detailed);
+            addDetailedInfo(this.responseText, resultsDetailed);
             localStorage.setItem("detailed" + unitName, this.responseText);
         });
 
         detailedInfoRequest.open("GET", "/api/szczegolowe/" + unitName);
         detailedInfoRequest.send();
     }
-
-    // var data = localStorage.getItem("data" + unitName);
-    // if (data !== null) {
-    //     addCandidatesResults(data);
-    // }
-
-    // console.log(candidatesResults)
 
 });
