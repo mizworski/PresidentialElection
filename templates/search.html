@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <link href="{% static 'style.css' %}" rel="stylesheet" type="text/css">
+    <title>Wybory Prezydenta 2000</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript">
+        unitName = '{{ name }}';
+        queryStr = '';
+    </script>
+    <script type="text/javascript" src="/static/search.js"></script>
+</head>
+<body>
+<div id="top">
+    <div id="left_box" class="side_box">
+        <a href="/search">
+            <div>
+                search
+            </div>
+        </a>
+    </div>
+    <div id="title">
+        <h1>Wybory Prezydenta 2000</h1>
+    </div>
+    <div id="right_box" class="side_box">
+
+        {% if czy_zalogowany is False %}
+            <a href="/login">
+                <div>
+                    login
+                </div>
+            </a>
+            <a href="/signup">
+                <div>register
+                </div>
+            </a>
+        {% else %}
+            <a href="/logout" style="border-right: 1px solid whitesmoke">
+                <div>
+                    logout
+                </div>
+            </a>
+        {% endif %}
+
+
+    </div>
+</div>
+<div id="tresc">
+    <div id="nawigacja">
+        <h3>Jesteś tutaj:
+            <a href="/">Polska</a>
+            |
+            <a href="/search">Wyszukiwarka</a>
+        </h3>
+    </div>
+
+    <div id="search_bar">
+        <h3>Szukaj gminy:</h3>
+
+        <input name="community"
+               placeholder="Nazwa gminy"
+               type="text"
+               class="input"
+               id="input_field"/>
+
+    </div>
+
+
+    <div id="wyniki_szczegolowe">
+        <div id="wyniki_szczegolowe_tabela">
+
+            <table class="wyniki" id="wyniki_szczegolowe_zawartosc">
+                {% comment %}
+                {% if query_sent %}
+                    <thead>
+                    <tr>
+                        {% for label in labels %}
+                            <th>{{ label }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for wiersz in wyniki %}
+                        <tr>
+                            {% for kolumna in wiersz %}
+                                {% if forloop.counter == 1 %}
+                                    <td><a href="{{ kolumna }}">
+                                        {% elif forloop.counter == 2 %}
+                                        {{ kolumna }}</a></td>
+                                {% else %}
+                                    <td>{{ kolumna }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                {% endif %}
+                {% endcomment %}
+            </table>
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>

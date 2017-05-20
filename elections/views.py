@@ -85,126 +85,12 @@ def process_search(request):
     return render(request, "search.html", data)
 
 
-def get_webpage_data(class_type, name):
-    if class_type == Community:
-        args = name.split('_')
-        objects = class_type.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])
-    else:
-        objects = class_type.objects.all().filter(name=name)
-
-    electoral_unit = objects[0]
-    general_info = electoral_unit.general()
-
-    candidates_results = electoral_unit.results()
-
-    valid_votes = general_info['votes_valid']
-
-    cand_table_data = []
-    cand_names = []
-
-    i = 0
-    for res in candidates_results:
-        name = res.first_name + ' ' + res.last_name
-        votes = res.result
-        support_val = 100 * res.result / valid_votes
-        if support_val > 100:
-            support_val = 100
-        support = ('%.2f' % support_val).replace(',', '.')
-
-        cand_names.append(name)
-        cand_table_data.append([name, votes, support, colors[i]])
-        i += 1
-
-    labels = ['Nazwa jednostki', 'Głosy ważne'] + cand_names
-
-    descendants = []
-
-    if class_type == Country:
-        descendants = Province.objects.all()
-    elif class_type == Province:
-        descendants = electoral_unit.circuit_set.all()
-    elif class_type == Circuit:
-        descendants = electoral_unit.community_set.all()
-
-    detailed_results = []
-
-    hierarchy_nodes = []
-
-    if class_type != Country:
-        node = electoral_unit
-        name = node.name
-
-        if name.isdigit() and len(name) == 1:
-            name = '0' + name
-
-        if name.isdigit():
-            name = 'Obwód' + name
-        hierarchy_nodes.append(name)
-
-        while type(node) != Province:
-            node = node.ancestor
-            name = node.name
-            if name.isdigit() and len(name) == 1:
-                name = '0' + name
-
-            if name.isdigit():
-                name = 'Obwód' + name
-            hierarchy_nodes.append(name)
-
-    for descendant in descendants:
-        desc_res = descendant.results()
-        name = descendant.name
-
-        if name.isdigit() and len(name) == 1:
-            name = '0' + name
-
-        if descendant.name.isdigit():
-            name = 'Obwód' + name
-
-        href = '/wyniki/' + name_to_href(name)
-
-        if class_type == Circuit:
-            href += '_' + descendant.ancestor.name
-
-        desc_data = [href, name, descendant.general()['votes_valid']]
-        for res in desc_res:
-            votes = res.result
-            desc_data.append(votes)
-
-        detailed_results.append(desc_data)
-
-    data = {
-        'czy_gmina': class_type == Community,
-        'uprawnionych': general_info['entitled_to_vote'],
-        'kart_waznych': general_info['ballots_issued'],
-        'glosow_waznych': general_info['votes_valid'],
-        'glosow_niewaznych': general_info['votes_invalid'],
-        'kandydaci': sorted(cand_table_data, key=lambda x: x[1], reverse=True),
-        'labels': labels,
-        'wyniki': sorted(detailed_results, key=lambda x: x[1]),
-        'jednostki': reversed(hierarchy_nodes)
-    }
-
-    return data
-
-
 # noinspection PyArgumentList
 def index(request, arg):
     arg = arg.replace('.html', '')
     metadata = {'name': arg}
-    # if arg == '':
-    #     data = get_webpage_data(Country, 'Polska')
-    # elif arg in [name_to_href(Province.objects.all()[i].name) for i in range(0, len(Province.objects.all()))]:
-    #     data = get_webpage_data(Province, arg)
-    # elif arg in [name_to_href(Circuit.objects.all()[i].name) for i in range(0, len(Circuit.objects.all()))]:
-    #     data = get_webpage_data(Circuit, arg)
-    # else:
-    #     if request.method == 'POST':
-    #         update_community(request, arg)
-    #     data = get_webpage_data(Community, arg)
 
     is_logged = request.user.is_authenticated()
-
     if '_' in arg:
         is_community = True
     else:
@@ -316,17 +202,21 @@ def get_electoral_unit(name):
     if '_' in name:
         args = name.split('_')
         objects = Community.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])
+        type = Community
     elif name == '':
-        objects = Country.objects.all().filter(name=name)
+        objects = Country.objects.all().filter(name='Polska')
+        type = Country
     elif name in [name_to_href(Province.objects.all()[i].name) for i in range(0, len(Province.objects.all()))]:
         objects = Province.objects.all().filter(name=name)
-    elif name in [name_to_href(Circuit.objects.all()[i].name) for i in range(0, len(Circuit.objects.all()))]:
+        type = Province
+    else:
+        type = Circuit
         objects = Circuit.objects.all().filter(name=name)
-    return objects[0]
+    return objects[0], type
 
 
 def get_general_info(request, arg):
-    electoral_unit = get_electoral_unit(arg)
+    electoral_unit, unit_type = get_electoral_unit(arg)
     general_info = electoral_unit.general()
 
     data = [
@@ -348,14 +238,14 @@ def get_general_info(request, arg):
         {
             'label': 'Liczba głosów nieważnych',
             'short': 'glosow_niewaznych',
-            'value':  general_info['votes_invalid']
+            'value': general_info['votes_invalid']
         },
     ]
     return JsonResponse(data, safe=False)
 
 
 def get_candidates_info(request, arg):
-    electoral_unit = get_electoral_unit(arg)
+    electoral_unit, unit_type = get_electoral_unit(arg)
 
     general_info = electoral_unit.general()
     candidates_results = electoral_unit.results()
@@ -382,4 +272,98 @@ def get_candidates_info(request, arg):
     general_labels = ['Lp', 'Imię i nazwisko', 'Liczba oddanych głosów', 'Wynik wyborczy']
     data = {'cand_table': sorted(cand_table_data, key=lambda x: x[1], reverse=True),
             'labels': general_labels}
+    return JsonResponse(data, safe=False)
+
+
+def get_detailed_info(request, arg):
+    electoral_unit, unit_type = get_electoral_unit(arg)
+
+    descendants = []
+
+    if unit_type == Country:
+        descendants = Province.objects.all()
+    elif unit_type == Province:
+        descendants = electoral_unit.circuit_set.all()
+    elif unit_type == Circuit:
+        descendants = electoral_unit.community_set.all()
+
+    detailed_results = []
+
+    cand_names = []
+
+    fill_labels = True
+    for descendant in descendants:
+        desc_res = descendant.results()
+        name = descendant.name
+
+        if name.isdigit() and len(name) == 1:
+            name = '0' + name
+
+        if descendant.name.isdigit():
+            name = 'Obwód' + name
+
+        href = '/wyniki/' + name_to_href(name)
+
+        if unit_type == Circuit:
+            href += '_' + descendant.ancestor.name
+
+        desc_data = [href, name, descendant.general()['votes_valid']]
+        for res in desc_res:
+            votes = res.result
+            desc_data.append(votes)
+
+            if fill_labels is True:
+                name = res.first_name + ' ' + res.last_name
+                cand_names.append(name)
+
+        fill_labels = False
+        detailed_results.append(desc_data)
+        labels = ['Nazwa jednostki', 'Głosy ważne'] + cand_names
+
+        data = {
+            'labels': labels,
+            'detailed_results': sorted(detailed_results, key=lambda x: x[1]),
+        }
+
+    return JsonResponse(data, safe=False)
+
+
+def get_search_results(request, arg):
+    if arg is '':
+        data = {'is_logged': request.user.is_authenticated()}
+        return JsonResponse(data, safe=False)
+
+    cand_names = []
+
+    country = Country.objects.all()[0]
+    cres = country.results()
+
+    for res in cres:
+        cand_names.append(res.first_name + ' ' + res.last_name)
+
+    labels = ['Nazwa jednostki', 'Głosy ważne'] + cand_names
+
+    comm_name = arg
+    comms = Community.objects.all().filter(name__contains=comm_name)
+
+    detailed_results = []
+
+    for comm in comms:
+        desc_res = comm.results()
+        name = comm.name
+
+        href = '/wyniki/' + name_to_href(name) + '_' + comm.ancestor.name
+        desc_data = [href, name, comm.general()['votes_valid']]
+        for res in desc_res:
+            votes = res.result
+            desc_data.append(votes)
+
+        detailed_results.append(desc_data)
+
+    data = {
+        'labels': labels,
+        'detailed_results': sorted(detailed_results, key=lambda x: x[1]),
+        'is_logged': request.user.is_authenticated()
+    }
+
     return JsonResponse(data, safe=False)

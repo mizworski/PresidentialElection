@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load static %}
+    <link href="{% static 'form.css' %}" rel="stylesheet" type="text/css">
+    <title>Logowanie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<div id="wrapper">
+    <div id="box">
+        <h1 class="header">Login</h1>
+        <form method="post" action="" enctype="multipart/form-data"> {% csrf_token %}
+            <input type="hidden" name="request_path" value="{{ request_path }}">
+            <input name="username"
+                   placeholder="username"
+                   type="text"
+                   class="input"
+                   required/>
+            <input name="password"
+                   placeholder="password"
+                   type="password"
+                   class="input"
+                   required/>
+            <button class="button" type="submit">Login</button>
+        </form>
+        <a href="../signup">Register</a>
+
+        <div class="uwaga">{{ msg }}</div>
+    </div>
+</div>
+</body>
+</html>

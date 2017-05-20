@@ -30,6 +30,9 @@ urlpatterns = [
     url(r'^api/kandydaci/(?P<arg>.*)', elections.views.get_candidates_info),
     url(r'^api/zbiorcze/Obwód(0)?(?P<arg>.*)', elections.views.get_general_info),
     url(r'^api/zbiorcze/(?P<arg>.*)', elections.views.get_general_info),
+    url(r'^api/szczegolowe/Obwód(0)?(?P<arg>.*)', elections.views.get_detailed_info),
+    url(r'^api/szczegolowe/(?P<arg>.*)', elections.views.get_detailed_info),
+    url(r'^api/search/(?P<arg>.*)', elections.views.get_search_results),
 
     url(r'^admin/', admin.site.urls),
 ]
