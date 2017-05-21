@@ -244,7 +244,7 @@ function updateOnTokenStatusChange(right_box) {
         var logoutButton = document.createElement('button');
         logoutButton.type = 'button';
         logoutButton.id = 'logout_button';
-        logoutButton.innerHTML = 'wyloguj się';
+        logoutButton.innerHTML = 'logout';
 
         right_box.appendChild(document.createElement('div'))
             .appendChild(logoutButton);
