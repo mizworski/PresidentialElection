@@ -90,10 +90,15 @@ def update_community(request):
                      entitled_to_vote=items["uprawnionych"],
                      ballots_issued=items["kart_waznych"]
                      )
-    comm.save()
 
     results_ids_to_delete = []
     results_in_comms = ResultsInCommunity.objects.all().filter(community=comm_prev)
+    for res in results_in_comms:
+        cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
+        if cand_name not in items.keys():
+            return HttpResponse(status=400)
+
+    comm.save()
     for res in results_in_comms:
         cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
         new_res = ResultsInCommunity(community=comm, candidate=res.candidate, result=items[cand_name])
