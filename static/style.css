@@ -58,6 +58,7 @@ div#title {
     display: -webkit-flex;
     -webkit-flex-flow: row wrap;
 }
+
 .side_box div {
     width: 100%;
     align-content: center;
@@ -115,7 +116,6 @@ div#wyniki_szczegolowe {
 div#wyniki_ogolne {
     padding: 15px 0 15px 0;
 }
-
 
 div#wyniki_top {
     padding: 15px 0;
@@ -265,7 +265,12 @@ div#search_button {
     padding: 20px 0 20px 0;
 }
 
-.button {
+.button_box button {
+    float: right;
+    margin-bottom: 15px;
+}
+
+.submit_button {
     font-family: inherit;
     border: 0;
     padding: 10px;

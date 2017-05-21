@@ -20,6 +20,7 @@ function addCandidatesResults(serializedData, candidatesResults) {
         candidatesResults.removeChild(candidatesResults.firstChild);
     }
 
+    var token = localStorage.getItem('token');
     var data = JSON.parse(serializedData);
     var tableHead = document.createElement("thead");
     var tableRow = document.createElement("tr");
@@ -44,7 +45,8 @@ function addCandidatesResults(serializedData, candidatesResults) {
         table_row.appendChild(document.createElement('td'))
             .appendChild(document.createTextNode(candidate[0]));
 
-        if (isLogged === 'True' && isCommunity === 'True') {
+
+        if (token !== '' && isCommunity === 'True') {
             var input_wrapper = document.createElement('div');
             var inputField = document.createElement('input');
             inputField.name = candidate[0];
@@ -92,6 +94,7 @@ function addGeneralInfo(serializedData, generalInfo) {
         generalInfo.removeChild(generalInfo.firstChild);
     }
 
+    var token = localStorage.getItem('token');
     var data = JSON.parse(serializedData);
     for (var i = 0; i < data.length; ++i) {
         var row = data[i];
@@ -104,7 +107,7 @@ function addGeneralInfo(serializedData, generalInfo) {
         label_wrapper.innerHTML = label;
         row_wrapper.appendChild(label_wrapper);
 
-        if (isLogged === 'True' && isCommunity === 'True') { // super kurwa język
+        if (token !== '' && isCommunity === 'True') {
             var value_wrapper = document.createElement('div');
             var inputField = document.createElement('input');
             inputField.name = row['short'];
@@ -133,16 +136,74 @@ function addDetailedInfo(serializedData, detailedInfo) {
     var tableHead = document.createElement("thead");
     var tableRow = document.createElement("tr");
 
+    /// Create labels
+    var labels = data['labels'];
+    for (var key in labels) {
+        var label = labels[key];
+        tableRow.appendChild(document.createElement('th'))
+            .appendChild(document.createTextNode(label))
+    }
+    tableHead.appendChild(tableRow);
+
+
+    /// Fill with data
     var tableBody = document.createElement("tbody");
+
+    var detailed_results = data['detailed_results'];
+    for (var i = 0; i < detailed_results.length; ++i) {
+        var table_row = document.createElement("tr");
+        var electoral_unit_results = detailed_results[i];
+
+        var unit_name_column = document.createElement("td");
+        var unit_name_link = document.createElement("a");
+        unit_name_link.href = electoral_unit_results[0];
+        unit_name_link.innerHTML = electoral_unit_results[1];
+        unit_name_column.appendChild(unit_name_link);
+        table_row.appendChild(unit_name_column);
+
+        for (var j = 2; j < electoral_unit_results.length; ++j) {
+            var column = electoral_unit_results[j];
+            table_row.appendChild(document.createElement('td'))
+                .appendChild(document.createTextNode(column));
+        }
+
+
+        tableBody.appendChild(table_row)
+    }
 
     detailedInfo.appendChild(tableHead);
     detailedInfo.appendChild(tableBody);
 }
 
-window.addEventListener("load", function () {
-    var generalInfo = document.getElementById("zbiorcze_info");
-    var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
-    var results_detailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+
+function submitUpdate(generalInfo, candidatesResults) {
+    var generalInfoInputs = generalInfo.getElementsByTagName('input');
+    var candidatesResultsInputs = candidatesResults.getElementsByTagName('input');
+
+    var updateData = {'name': unitName};
+
+    for (var i = 0; i < generalInfoInputs.length; ++i) {
+        updateData[generalInfoInputs[i].name] = generalInfoInputs[i].value
+    }
+
+    for (var j = 0; j < candidatesResultsInputs.length; ++j) {
+        updateData[candidatesResultsInputs[j].name] = candidatesResultsInputs[j].value
+    }
+
+    var updateRequest = new XMLHttpRequest();
+
+
+    updateRequest.open("POST", "/api/update");
+    updateRequest.send(JSON.stringify(updateData));
+}
+
+function reload(generalInfo, candidatesResults, resultsDetailed) {
+
+    /// Candidates results
+    var storedCandidatesResults = localStorage.getItem("candidates" + unitName);
+    if (storedCandidatesResults !== null) {
+        addCandidatesResults(storedCandidatesResults, candidatesResults);
+    }
 
     var candidatesInfoRequest = new XMLHttpRequest();
     candidatesInfoRequest.addEventListener("load", function () {
@@ -153,6 +214,12 @@ window.addEventListener("load", function () {
     candidatesInfoRequest.open("GET", "/api/kandydaci/" + unitName);
     candidatesInfoRequest.send();
 
+    /// General info
+    var storedGeneralInfo = localStorage.getItem("general" + unitName);
+    if (storedGeneralInfo !== null) {
+        addGeneralInfo(storedGeneralInfo, generalInfo);
+    }
+
     var generalInfoRequest = new XMLHttpRequest();
     generalInfoRequest.addEventListener("load", function () {
         addGeneralInfo(this.responseText, generalInfo);
@@ -162,20 +229,99 @@ window.addEventListener("load", function () {
     generalInfoRequest.open("GET", "/api/zbiorcze/" + unitName);
     generalInfoRequest.send();
 
-    var detailedInfoRequest = new XMLHttpRequest();
-    detailedInfoRequest.addEventListener("load", function () {
-        addDetailedInfo(this.responseText, results_detailed);
-        localStorage.setItem("detailed" + unitName, this.responseText);
-    });
+    /// Detailed info
+    if (isCommunity === 'False') {
+        var storedDetailedInfo = localStorage.getItem("detailed" + unitName);
+        if (storedDetailedInfo !== null) {
+            addDetailedInfo(storedDetailedInfo, resultsDetailed);
+        }
 
-    detailedInfoRequest.open("GET", "/api/szczegolowe/" + unitName);
-    detailedInfoRequest.send();
+        var detailedInfoRequest = new XMLHttpRequest();
+        detailedInfoRequest.addEventListener("load", function () {
+            addDetailedInfo(this.responseText, resultsDetailed);
+            localStorage.setItem("detailed" + unitName, this.responseText);
+        });
 
-    // var data = localStorage.getItem("data" + unitName);
-    // if (data !== null) {
-    //     addCandidatesResults(data);
+        detailedInfoRequest.open("GET", "/api/szczegolowe/" + unitName);
+        detailedInfoRequest.send();
+    }
+}
+
+function updateNavBar(right_box) {
+    var token = localStorage.getItem('token');
+
+    if (token !== '') {
+        right_box.innerHTML = '';
+        var logoutButton = document.createElement('button');
+        logoutButton.type = 'button';
+        logoutButton.id = 'logout_button';
+        logoutButton.innerHTML = 'wyloguj się';
+
+        right_box.appendChild(document.createElement('div'))
+            .appendChild(logoutButton);
+
+        logoutButton.addEventListener('click', function () {
+            localStorage.setItem('token', '');
+            updateNavBar(right_box);
+            if (isCommunity === 'True') {
+                var generalInfo = document.getElementById("zbiorcze_info");
+                var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
+                var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+                reload(generalInfo, candidatesResults, resultsDetailed);
+            }
+        });
+    } else {
+        right_box.innerHTML = '';
+        var loginButton = document.createElement('a');
+        loginButton.appendChild(document.createElement('div'))
+            .appendChild(document.createTextNode('login'));
+        loginButton.href = '/login';
+
+        var registerButton = document.createElement('a');
+        registerButton.appendChild(document.createElement('div'))
+            .appendChild(document.createTextNode('register'));
+        registerButton.href = '/signup';
+
+        right_box.appendChild(loginButton);
+        right_box.appendChild(registerButton);
+    }
+}
+
+window.addEventListener("load", function () {
+    var generalInfo = document.getElementById("zbiorcze_info");
+    var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
+    var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+
+    var right_box = document.getElementById('right_box');
+
+    updateNavBar(right_box);
+
+    reload(generalInfo, candidatesResults, resultsDetailed);
+
+    // var buttons = document.getElementsByClassName('submit_button');
+    var token = localStorage.getItem('token');
+
+    var buttonBoxes = document.getElementsByClassName('button_box');
+
+
+    for (var i = 0; i < buttonBoxes.length; ++i) {
+        var button = document.createElement('button');
+        button.class = 'submit_button';
+        button.type = 'button';
+        button.innerHTML = 'Wyślij';
+        buttonBoxes[i].appendChild(button);
+        button.addEventListener('click', function () {
+            submitUpdate(generalInfo, candidatesResults);
+            setTimeout(reload(generalInfo, candidatesResults, resultsDetailed), 3000);
+        })
+    }
+
+    // for (var i = 0; i < buttons.length; ++i) {
+    //     buttons[i].addEventListener('click', function () {
+    //         submitUpdate(generalInfo, candidatesResults);
+    //         setTimeout(reload(generalInfo, candidatesResults, resultsDetailed), 3000);
+    //     })
     // }
 
-    // console.log(candidatesResults)
 
 });

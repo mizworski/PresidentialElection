@@ -58,7 +58,7 @@ div#box {
     box-sizing: border-box;
 }
 
-.button {
+.submit_button {
     font-family: inherit;
     border: 0;
     padding: 10px;

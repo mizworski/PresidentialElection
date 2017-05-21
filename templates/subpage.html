@@ -25,28 +25,7 @@
     <div id="title">
         <h1>Wybory Prezydenta 2000</h1>
     </div>
-    <div id="right_box" class="side_box">
-
-        {% if czy_zalogowany is False %}
-            <a href="/login">
-                <div>
-                    login
-                </div>
-            </a>
-            <a href="/signup">
-                <div>register
-                </div>
-            </a>
-        {% else %}
-            <a href="/logout" style="border-right: 1px solid whitesmoke">
-                <div>
-                    logout
-                </div>
-            </a>
-        {% endif %}
-
-
-    </div>
+    <div id="right_box" class="side_box"></div>
 </div>
 <div id="tresc">
     <form action="" method="POST">
@@ -70,11 +49,11 @@
             </div>
 
         </div>
-        {% if czy_zalogowany is True and czy_gmina is True %}
-            <div id="submit_button">
-                <button class="button" type="button">Wyślij</button>
-            </div>
-        {% endif %}
+        <div class="button_box">
+            {% if czy_zalogowany is True and czy_gmina is True %}
+                <button class="submit_button" type="button">Wyślij</button>
+            {% endif %}
+        </div>
 
         <div id="wyniki_ogolne">
             <h3>Wyniki wyborów</h3>
@@ -90,11 +69,11 @@
             </div>
         </div>
 
-        {% if czy_zalogowany is True and czy_gmina is True %}
-            <div id="submit_button">
-                <button class="button" type="button">Wyślij</button>
-            </div>
-        {% endif %}
+        <div class="button_box">
+            {% if czy_zalogowany is True and czy_gmina is True %}
+                <button class="submit_button" type="button">Wyślij</button>
+            {% endif %}
+        </div>
     </form>
 </div>
 </body>

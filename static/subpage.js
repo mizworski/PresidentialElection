@@ -20,6 +20,7 @@ function addCandidatesResults(serializedData, candidatesResults) {
         candidatesResults.removeChild(candidatesResults.firstChild);
     }
 
+    var token = localStorage.getItem('token');
     var data = JSON.parse(serializedData);
     var tableHead = document.createElement("thead");
     var tableRow = document.createElement("tr");
@@ -44,7 +45,8 @@ function addCandidatesResults(serializedData, candidatesResults) {
         table_row.appendChild(document.createElement('td'))
             .appendChild(document.createTextNode(candidate[0]));
 
-        if (isLogged === 'True' && isCommunity === 'True') {
+
+        if (token !== '' && isCommunity === 'True') {
             var input_wrapper = document.createElement('div');
             var inputField = document.createElement('input');
             inputField.name = candidate[0];
@@ -92,6 +94,7 @@ function addGeneralInfo(serializedData, generalInfo) {
         generalInfo.removeChild(generalInfo.firstChild);
     }
 
+    var token = localStorage.getItem('token');
     var data = JSON.parse(serializedData);
     for (var i = 0; i < data.length; ++i) {
         var row = data[i];
@@ -104,14 +107,13 @@ function addGeneralInfo(serializedData, generalInfo) {
         label_wrapper.innerHTML = label;
         row_wrapper.appendChild(label_wrapper);
 
-        if (isLogged === 'True' && isCommunity === 'True') { // super kurwa język
+        if (token !== '' && isCommunity === 'True') {
             var value_wrapper = document.createElement('div');
             var inputField = document.createElement('input');
             inputField.name = row['short'];
             inputField.value = value;
             inputField.type = 'text';
             inputField.class = 'input';
-            // inputField.id = 'in' + i;
 
             value_wrapper.appendChild(inputField);
             row_wrapper.appendChild(value_wrapper);
@@ -245,24 +247,81 @@ function reload(generalInfo, candidatesResults, resultsDetailed) {
     }
 }
 
+function updateNavBar(right_box) {
+    var token = localStorage.getItem('token');
+
+    if (token !== '') {
+        right_box.innerHTML = '';
+        var logoutButton = document.createElement('button');
+        logoutButton.type = 'button';
+        logoutButton.id = 'logout_button';
+        logoutButton.innerHTML = 'wyloguj się';
+
+        right_box.appendChild(document.createElement('div'))
+            .appendChild(logoutButton);
+
+        logoutButton.addEventListener('click', function () {
+            localStorage.setItem('token', '');
+            updateNavBar(right_box);
+            if (isCommunity === 'True') {
+                var generalInfo = document.getElementById("zbiorcze_info");
+                var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
+                var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+                reload(generalInfo, candidatesResults, resultsDetailed);
+            }
+        });
+    } else {
+        right_box.innerHTML = '';
+        var loginButton = document.createElement('a');
+        loginButton.appendChild(document.createElement('div'))
+            .appendChild(document.createTextNode('login'));
+        loginButton.href = '/login';
+
+        var registerButton = document.createElement('a');
+        registerButton.appendChild(document.createElement('div'))
+            .appendChild(document.createTextNode('register'));
+        registerButton.href = '/signup';
+
+        right_box.appendChild(loginButton);
+        right_box.appendChild(registerButton);
+    }
+}
+
 window.addEventListener("load", function () {
-    // if token is not empty then render logout
-
-
     var generalInfo = document.getElementById("zbiorcze_info");
     var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
     var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
 
+    var right_box = document.getElementById('right_box');
+
+    updateNavBar(right_box);
+
     reload(generalInfo, candidatesResults, resultsDetailed);
 
-    var buttons = document.getElementsByTagName('button');
+    // var buttons = document.getElementsByClassName('submit_button');
+    var token = localStorage.getItem('token');
 
-    for (var i = 0; i < buttons.length; ++i) {
-        buttons[i].addEventListener('click', function () {
+    var buttonBoxes = document.getElementsByClassName('button_box');
+
+
+    for (var i = 0; i < buttonBoxes.length; ++i) {
+        var button = document.createElement('button');
+        button.innerHTML = 'Wyślij';
+        button.type = 'button';
+        button.className = 'submit_button';
+        buttonBoxes[i].appendChild(button);
+        button.addEventListener('click', function () {
             submitUpdate(generalInfo, candidatesResults);
             setTimeout(reload(generalInfo, candidatesResults, resultsDetailed), 3000);
         })
     }
+
+    // for (var i = 0; i < buttons.length; ++i) {
+    //     buttons[i].addEventListener('click', function () {
+    //         submitUpdate(generalInfo, candidatesResults);
+    //         setTimeout(reload(generalInfo, candidatesResults, resultsDetailed), 3000);
+    //     })
+    // }
 
 
 });

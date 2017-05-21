@@ -325,7 +325,7 @@
     font-size: 13px;
 }
 
-#changelist .actions .button {
+#changelist .actions .submit_button {
     font-size: 13px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -339,6 +339,6 @@
     color: #333;
 }
 
-#changelist .actions .button:focus, #changelist .actions .button:hover {
+#changelist .actions .submit_button:focus, #changelist .actions .submit_button:hover {
     border-color: #999;
 }
