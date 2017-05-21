@@ -1,20 +1,3 @@
-// using jQuery
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i];
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
 function addCandidatesResults(serializedData, candidatesResults) {
     while (candidatesResults.children.length !== 0) {
         candidatesResults.removeChild(candidatesResults.firstChild);
@@ -308,7 +291,6 @@ function addSubmitButtons(generalInfo, candidatesResults, resultsDetailed) {
             buttonBoxes[i].appendChild(button);
             button.addEventListener('click', function () {
                 submitUpdate(generalInfo, candidatesResults, resultsDetailed);
-                // setTimeout(, 2000);
             })
         }
     } else {

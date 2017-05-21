@@ -6,10 +6,6 @@
     <link href="{% static 'style.css' %}" rel="stylesheet" type="text/css">
     <title>Wybory Prezydenta 2000</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript">
-        unitName = '{{ name }}';
-        queryStr = '';
-    </script>
     <script type="text/javascript" src="/static/search.js"></script>
 </head>
 <body>
@@ -33,13 +29,11 @@
 
     <div id="search_bar">
         <h3>Szukaj gminy:</h3>
-
         <input name="community"
                placeholder="Nazwa gminy"
                type="text"
                class="input"
                id="input_field"/>
-
     </div>
 
 
