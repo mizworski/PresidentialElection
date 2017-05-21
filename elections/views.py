@@ -1,5 +1,5 @@
 import json
-
+import jwt
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
 from elections.models import *
@@ -107,16 +107,6 @@ def index(request, arg):
 @csrf_exempt
 def update_community(request):
     items = json.loads(request.body.decode("utf-8"))
-    cands = Candidate.objects.all()
-    cands_names = [candidate.first_name + ' ' + candidate.last_name for candidate in cands]
-    stats = [
-        'uprawnionych',
-        'kart_waznych',
-        'glosow_waznych',
-        'glosow_niewaznych'
-    ]
-
-    labels = stats + cands_names
 
     args = items['name'].split('_')
     comms = Community.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])
@@ -130,20 +120,19 @@ def update_community(request):
                      ballots_issued=items["kart_waznych"]
                      )
     comm.save()
-    Community.objects.all().filter(id=comm_prev.id).delete()
 
-    # results_ids_to_delete = []
-    # results_in_comms = ResultsInCommunity.objects.all().filter(community=comm_prev)
-    # for res in results_in_comms:1
-    #     cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
-    #     new_res = ResultsInCommunity(community=comm, candidate=res.candidate, result=form[cand_name])
-    #     results_ids_to_delete.append(res.id)
-    #     new_res.save()
-    #
-    # for res_id in results_ids_to_delete:
-    #     ResultsInCommunity.objects.all().filter(id=res_id).delete()
-    #
-    # Community.objects.all().filter(id=comm_prev.id).delete()
+    results_ids_to_delete = []
+    results_in_comms = ResultsInCommunity.objects.all().filter(community=comm_prev)
+    for res in results_in_comms:
+        cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
+        new_res = ResultsInCommunity(community=comm, candidate=res.candidate, result=items[cand_name])
+        results_ids_to_delete.append(res.id)
+        new_res.save()
+
+    for res_id in results_ids_to_delete:
+        ResultsInCommunity.objects.all().filter(id=res_id).delete()
+
+    Community.objects.all().filter(id=comm_prev.id).delete()
 
 
 def process_login_form(request):

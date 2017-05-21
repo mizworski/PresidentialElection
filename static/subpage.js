@@ -174,13 +174,18 @@ function addDetailedInfo(serializedData, detailedInfo) {
 }
 
 
-function submitUpdate(generalInfo) {
+function submitUpdate(generalInfo, candidatesResults) {
     var generalInfoInputs = generalInfo.getElementsByTagName('input');
+    var candidatesResultsInputs = candidatesResults.getElementsByTagName('input');
 
     var updateData = {'name': unitName};
 
     for (var i = 0; i < generalInfoInputs.length; ++i) {
         updateData[generalInfoInputs[i].name] = generalInfoInputs[i].value
+    }
+
+    for (var j = 0; j < candidatesResultsInputs.length; ++j) {
+        updateData[candidatesResultsInputs[j].name] = candidatesResultsInputs[j].value
     }
 
     var updateRequest = new XMLHttpRequest();
@@ -190,10 +195,7 @@ function submitUpdate(generalInfo) {
     updateRequest.send(JSON.stringify(updateData));
 }
 
-window.addEventListener("load", function () {
-    var generalInfo = document.getElementById("zbiorcze_info");
-    var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
-    var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+function reload(generalInfo, candidatesResults, resultsDetailed) {
 
     /// Candidates results
     var storedCandidatesResults = localStorage.getItem("candidates" + unitName);
@@ -241,12 +243,20 @@ window.addEventListener("load", function () {
         detailedInfoRequest.open("GET", "/api/szczegolowe/" + unitName);
         detailedInfoRequest.send();
     }
+}
+
+window.addEventListener("load", function () {
+    var generalInfo = document.getElementById("zbiorcze_info");
+    var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
+    var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+    reload(generalInfo, candidatesResults, resultsDetailed);
 
     var buttons = document.getElementsByTagName('button');
 
     for (var i = 0; i < buttons.length; ++i) {
         buttons[i].addEventListener('click', function () {
-            submitUpdate(generalInfo)
+            submitUpdate(generalInfo, candidatesResults);
+            setTimeout(reload(generalInfo, candidatesResults, resultsDetailed), 3000);
         })
     }
 
