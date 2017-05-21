@@ -1,6 +1,6 @@
 import json
 import jwt
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -104,6 +104,7 @@ def update_community(request):
         ResultsInCommunity.objects.all().filter(id=res_id).delete()
 
     Community.objects.all().filter(id=comm_prev.id).delete()
+    return HttpResponse(status=200)
 
 
 def get_login_page(request):
