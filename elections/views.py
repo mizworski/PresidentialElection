@@ -97,6 +97,8 @@ def update_community(request):
         cand_name = res.candidate.first_name + ' ' + res.candidate.last_name
         if cand_name not in items.keys():
             return HttpResponse(status=400)
+        if items[cand_name] is None or int(items[cand_name]) < 0:
+            return HttpResponse(status=400)
 
     comm.save()
     for res in results_in_comms:
