@@ -8,37 +8,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="text/javascript">
         unitName = '{{ name }}';
-        isLogged = '{{ czy_zalogowany }}';
         isCommunity = '{{ czy_gmina }}'
     </script>
     <script type="text/javascript" src="/static/subpage.js"></script>
 </head>
 <body>
-<div id="top">
+<header>
     <div id="left_box" class="side_box">
         <a href="/search">
-            <div>
-                search
-            </div>
+            <div>search</div>
         </a>
     </div>
     <div id="title">
         <h1>Wybory Prezydenta 2000</h1>
     </div>
     <div id="right_box" class="side_box"></div>
-</div>
-<div id="tresc">
+</header>
+<div id="tresc_wrapper">
     <form action="" method="POST">
         {% csrf_token %}
-        <div id="nawigacja">
-            <h3>Jesteś tutaj:
+        <nav>
+            <h3>Powrót do strony głownej:
                 <a href="/">Polska</a>
-                {% for el in jednostki %}
-                    | <a href="{{ el }}">{{ el }}</a>
-                {% endfor %}
             </h3>
-        </div>
-        <div id="wyniki_top">
+        </nav>
+        <section id="wyniki_top">
             <div id="wyniki_top_zbiorcze">
                 <div id="wyniki_top_zbiorcze_gora">
                     <div>
@@ -48,32 +42,23 @@
                 </div>
             </div>
 
-        </div>
-        <div class="button_box">
-            {% if czy_zalogowany is True and czy_gmina is True %}
-                <button class="submit_button" type="button">Wyślij</button>
-            {% endif %}
-        </div>
+        </section>
+        <div class="button_box"></div>
 
-        <div id="wyniki_ogolne">
+        <section id="wyniki_ogolne">
             <h3>Wyniki wyborów</h3>
             <div id="wyniki_ogolne_tabela">
                 <table class="wyniki" id="wyniki_ogolne_zawartosc"></table>
             </div>
-        </div>
+        </section>
 
-
-        <div id="wyniki_szczegolowe">
+        <section id="wyniki_szczegolowe">
             <div id="wyniki_szczegolowe_tabela">
                 <table class="wyniki" id="wyniki_szczegolowe_zawartosc"></table>
             </div>
-        </div>
+        </section>
 
-        <div class="button_box">
-            {% if czy_zalogowany is True and czy_gmina is True %}
-                <button class="submit_button" type="button">Wyślij</button>
-            {% endif %}
-        </div>
+        <div class="button_box"></div>
     </form>
 </div>
 </body>

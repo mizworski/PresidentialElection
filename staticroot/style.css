@@ -86,12 +86,12 @@ div#top h1 {
     font-weight: normal;
 }
 
-div#tresc {
+div#tresc_wrapper {
     width: 72%;
     padding: 0 14% 3% 14%;
 }
 
-div#tresc > div {
+div#tresc_wrapper > div {
     padding: 15px 0 15px 0;
 }
 

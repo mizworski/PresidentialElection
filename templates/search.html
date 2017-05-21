@@ -13,27 +13,23 @@
     <script type="text/javascript" src="/static/search.js"></script>
 </head>
 <body>
-<div id="top">
+<header>
     <div id="left_box" class="side_box">
         <a href="/search">
-            <div>
-                search
-            </div>
+            <div>search</div>
         </a>
     </div>
     <div id="title">
         <h1>Wybory Prezydenta 2000</h1>
     </div>
     <div id="right_box" class="side_box"></div>
-</div>
-<div id="tresc">
-    <div id="nawigacja">
+</header>
+<div id="tresc_wrapper">
+    <nav>
         <h3>Jesteś tutaj:
-            <a href="/">Polska</a>
-            |
-            <a href="/search">Wyszukiwarka</a>
+            <a href="/">Polska</a> | <a href="/search">Wyszukiwarka</a>
         </h3>
-    </div>
+    </nav>
 
     <div id="search_bar">
         <h3>Szukaj gminy:</h3>
@@ -47,39 +43,11 @@
     </div>
 
 
-    <div id="wyniki_szczegolowe">
+    <section id="wyniki_szczegolowe">
         <div id="wyniki_szczegolowe_tabela">
-
-            <table class="wyniki" id="wyniki_szczegolowe_zawartosc">
-                {% comment %}
-                {% if query_sent %}
-                    <thead>
-                    <tr>
-                        {% for label in labels %}
-                            <th>{{ label }}</th>
-                        {% endfor %}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for wiersz in wyniki %}
-                        <tr>
-                            {% for kolumna in wiersz %}
-                                {% if forloop.counter == 1 %}
-                                    <td><a href="{{ kolumna }}">
-                                        {% elif forloop.counter == 2 %}
-                                        {{ kolumna }}</a></td>
-                                {% else %}
-                                    <td>{{ kolumna }}</td>
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                {% endif %}
-                {% endcomment %}
-            </table>
+            <table class="wyniki" id="wyniki_szczegolowe_zawartosc"></table>
         </div>
-    </div>
+    </section>
 
 
 </div>
