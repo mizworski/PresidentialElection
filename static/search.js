@@ -48,31 +48,19 @@ function addDetailedInfo(serializedData, detailedInfo) {
 
 window.addEventListener("load", function () {
     var inputBox = document.querySelector("#input_field");
-    console.log(inputBox);
 
     inputBox.addEventListener("input", function () {
         var results_detailed = document.getElementById("wyniki_szczegolowe_zawartosc");
 
         var detailedInfoRequest = new XMLHttpRequest();
-        console.log(inputBox.value)
-        var queriedVal = inputBox.value
+        var queriedVal = inputBox.value;
         detailedInfoRequest.addEventListener("load", function () {
-            console.log(inputBox.value)
-            console.log(queriedVal)
             if (queriedVal === inputBox.value) {
                 addDetailedInfo(this.responseText, results_detailed);
             }
-            // localStorage.setItem("detailed" + unitName, this.responseText);
         });
 
         detailedInfoRequest.open("GET", "/api/search/" + inputBox.value);
         detailedInfoRequest.send();
-
-        // var data = localStorage.getItem("data" + unitName);
-        // if (data !== null) {
-        //     addCandidatesResults(data);
-        // }
-
-        // console.log(candidatesResults)
     });
 });

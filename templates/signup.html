@@ -6,29 +6,33 @@
     <link href="{% static 'form.css' %}" rel="stylesheet" type="text/css">
     <title>Rejestracja</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="/static/register.js"></script>
 </head>
 <body>
 
 <div id="wrapper">
     <div id="box">
         <h1 class="header">Register</h1>
-        <form id="login_form" method="post" action="#"> {% csrf_token %}
-            <input type="hidden" name="request_path" value="{{ request_path }}">
+        <form id="login_form" method="POST" action="">
+            {% csrf_token %}
+            <input type="hidden" name="request_path" value="{{ request_path }}" id="request_path">
             <input name="username"
                    placeholder="username"
                    type="text"
                    class="input"
-                   required/>
+                   required
+                   id="username"/>
             <input name="password"
                    placeholder="password"
                    type="password"
                    class="input"
-                   required/>
-            <button class="button" type="submit">Submit</button>
+                   required
+                   id="password"/>
+            <button class="button" type="button">Submit</button>
         </form>
         <a href="../login">Login</a>
 
-        <div class="uwaga">{{ msg }}</div>
+        <div class="uwaga" id="message_box">{{ msg }}</div>
 
     </div>
 </div>

@@ -6,29 +6,32 @@
     <link href="{% static 'form.css' %}" rel="stylesheet" type="text/css">
     <title>Logowanie</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="/static/login.js"></script>
 </head>
 <body>
 
 <div id="wrapper">
     <div id="box">
         <h1 class="header">Login</h1>
-        <form method="post" action="" enctype="multipart/form-data"> {% csrf_token %}
-            <input type="hidden" name="request_path" value="{{ request_path }}">
+        <form method="post" action=""> {% csrf_token %}
+            <input type="hidden" name="request_path" value="{{ request_path }}" id="request_path">
             <input name="username"
                    placeholder="username"
                    type="text"
                    class="input"
-                   required/>
+                   required
+                   id="username"/>
             <input name="password"
                    placeholder="password"
                    type="password"
                    class="input"
-                   required/>
-            <button class="button" type="submit">Login</button>
+                   required
+                   id="password"/>
+            <button class="button" type="button">Login</button>
         </form>
         <a href="../signup">Register</a>
 
-        <div class="uwaga">{{ msg }}</div>
+        <div class="uwaga" id="message_box">{{ msg }}</div>
     </div>
 </div>
 </body>

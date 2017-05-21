@@ -2,12 +2,17 @@ import json
 import jwt
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+
 from elections.models import *
 from elections.my_forms import *
 from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from rest_framework.authtoken.views import obtain_auth_token
 
 poziomy = ["province", "circuit", "community", ""]
 poziomy_id = ["province_id", "circuit_id", "community_id", ""]
@@ -47,43 +52,6 @@ def process_search(request):
         'query_sent': False,
         'czy_zalogowany': request.user.is_authenticated()
     }
-    if request.method == 'POST':
-        form = SearchForm(data=request.POST)
-        if form.is_valid():
-            cand_names = []
-
-            country = Country.objects.all()[0]
-            cres = country.results()
-
-            for res in cres:
-                cand_names.append(res.first_name + ' ' + res.last_name)
-
-            labels = ['Nazwa jednostki', 'Głosy ważne'] + cand_names
-
-            comm_name = form['community'].value()
-            comms = Community.objects.all().filter(name__contains=comm_name)
-
-            detailed_results = []
-
-            for comm in comms:
-                desc_res = comm.results()
-                name = comm.name
-
-                href = '/wyniki/' + name_to_href(name) + '_' + comm.ancestor.name
-                desc_data = [href, name, comm.general()['votes_valid']]
-                for res in desc_res:
-                    votes = res.result
-                    desc_data.append(votes)
-
-                detailed_results.append(desc_data)
-
-            data = {
-                'labels': labels,
-                'wyniki': sorted(detailed_results, key=lambda x: x[1]),
-                'input_value': comm_name,
-                'query_sent': True,
-                'czy_zalogowany': request.user.is_authenticated()
-            }
 
     return render(request, "search.html", data)
 
@@ -104,6 +72,9 @@ def index(request, arg):
     return render(request, "subpage.html", metadata)
 
 
+@api_view(['POST'])
+@authentication_classes((SessionAuthentication, TokenAuthentication))
+@permission_classes((IsAuthenticated,))
 @csrf_exempt
 def update_community(request):
     items = json.loads(request.body.decode("utf-8"))
@@ -135,55 +106,75 @@ def update_community(request):
     Community.objects.all().filter(id=comm_prev.id).delete()
 
 
-def process_login_form(request):
-    if request.method == 'POST':
-        form = LoginForm(data=request.POST)
-        if form.is_valid():
-            username = form['username'].value()
-            password = form['password'].value()
-            request_path = form['request_path'].value()
-            user = authenticate(username=username, password=password)
-            if user is None:
-                return render(request, 'login.html', {'form': RegisterForm(), 'msg': 'Niepoprawne dane logowania'})
+def get_login_page(request):
+    form = LoginForm()
+    data = {
+        'form': form,
+        'msg': '',
+        'request_path': request.META.get('HTTP_REFERER', '/')
+    }
+    return render(request, 'login.html', data)
 
-            login(request, user)
-            return redirect(request_path)
 
-    else:
-        form = LoginForm()
-        data = {
-            'form': form,
-            'msg': '',
-            'request_path': request.META.get('HTTP_REFERER', '/')
+@csrf_exempt
+def process_login(request):
+    items = json.loads(request.body.decode("utf-8"))
+
+    username = items['username']
+    password = items['password']
+    user = authenticate(username=username, password=password)
+    if user is None:
+        result = {
+            'status': 'failure',
+            'message': 'Niepoprawne dane logowania'
         }
-        return render(request, 'login.html', data)
+        return JsonResponse(result, safe=False)
+
+    # login(request, user)
+    token = Token.objects.get_or_create(user=user)
+
+    result = {
+        'status': 'success',
+        'token': token[0].key
+    }
+    return JsonResponse(result, safe=False)
 
 
-def process_signup_form(request):
-    if request.method == 'POST':
-        form = RegisterForm(data=request.POST)
-        if form.is_valid():
-            username = form['username'].value()
-            password = form['password'].value()
-            request_path = form['request_path'].value()
-            users = User.objects.filter(username=username)
-            if len(users) != 0:
-                return render(request, 'signup.html',
-                              {'form': RegisterForm(), 'msg': 'Użytkownik o podanym loginie już istnieje'})
+def get_signup_page(request):
+    form = RegisterForm()
+    data = {
+        'form': form,
+        'msg': '',
+        'request_path': request.META.get('HTTP_REFERER', '/')
+    }
+    return render(request, 'signup.html', data)
 
-            user = User.objects.create_user(username, password=password)
-            user.save()
-            login(request, user)
-            return redirect(request_path)
 
-    else:
-        form = RegisterForm()
-        data = {
-            'form': form,
-            'msg': '',
-            'request_path': request.META.get('HTTP_REFERER', '/')
+@csrf_exempt
+def process_signup(request):
+    items = json.loads(request.body.decode("utf-8"))
+    username = items['username']
+    password = items['password']
+    users = User.objects.filter(username=username)
+
+    if len(users) != 0:
+        result = {
+            'status': 'failure',
+            'message': 'Podany użytkownik już istnieje'
         }
-        return render(request, 'signup.html', data)
+        return JsonResponse(result, safe=False)
+
+    user = User.objects.create_user(username, password=password)
+    user.save()
+    # login(request, user)
+
+    token = Token.objects.get_or_create(user=user)
+
+    result = {
+        'status': 'success',
+        'token': token.key
+    }
+    return JsonResponse(result, safe=False)
 
 
 def process_logout(request):

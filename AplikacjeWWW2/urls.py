@@ -16,11 +16,12 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 import elections.views
+from rest_framework.authtoken import views
 
 urlpatterns = [
     url(r'^$', elections.views.index, kwargs={'arg': ''}),
-    url(r'^login/', elections.views.process_login_form),
-    url(r'^signup/', elections.views.process_signup_form),
+    url(r'^login/', elections.views.get_login_page),
+    url(r'^signup/', elections.views.get_signup_page),
     url(r'^logout/', elections.views.process_logout),
     url(r'^search/', elections.views.process_search),
     url(r'^wyniki/Obwód(0)?(?P<arg>.*)', elections.views.index),
@@ -33,7 +34,11 @@ urlpatterns = [
     url(r'^api/szczegolowe/Obwód(0)?(?P<arg>.*)', elections.views.get_detailed_info),
     url(r'^api/szczegolowe/(?P<arg>.*)', elections.views.get_detailed_info),
     url(r'^api/search/(?P<arg>.*)', elections.views.get_search_results),
+
+    url(r'^api/signup', elections.views.process_signup),
+    url(r'^api/login', elections.views.process_login),
     url(r'^api/update', elections.views.update_community),
 
     url(r'^admin/', admin.site.urls),
+    url(r'^api/get-token', views.obtain_auth_token)
 ]

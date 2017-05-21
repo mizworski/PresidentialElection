@@ -246,9 +246,13 @@ function reload(generalInfo, candidatesResults, resultsDetailed) {
 }
 
 window.addEventListener("load", function () {
+    // if token is not empty then render logout
+
+
     var generalInfo = document.getElementById("zbiorcze_info");
     var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
     var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
+
     reload(generalInfo, candidatesResults, resultsDetailed);
 
     var buttons = document.getElementsByTagName('button');
