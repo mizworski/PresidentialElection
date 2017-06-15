@@ -81,8 +81,8 @@ class Province(models.Model, ElectoralUnit):
 
 
 class Circuit(models.Model, ElectoralUnit):
-    ancestor = models.ForeignKey(Province, on_delete=models.CASCADE, editable=False)
-    name = models.CharField(editable=False, max_length=32)
+    ancestor = models.ForeignKey(Province, on_delete=models.CASCADE)
+    name = models.CharField(max_length=32)
     desc = models.CharField(max_length=128)
 
     def __str__(self):
@@ -135,15 +135,15 @@ class Community(models.Model, ElectoralUnit):
 
 
 class ResultsInCommunity(models.Model):
-    community = models.ForeignKey(Community, on_delete=models.CASCADE, editable=False)
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, editable=False)
+    community = models.ForeignKey(Community, on_delete=models.CASCADE)
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
 
     result = models.IntegerField()
 
     def __str__(self):
-        return 'Kandydat: {}, Gmina: {}. Okręg: {}, Województwo: {}'. \
-            format(self.candidate,
-                   self.community,
-                   self.community.ancestor,
-                   self.community.ancestor.ancestor
-                   ).encode('ascii', errors='replace')
+        return 'Kandydat {}'. \
+            format(self.candidate)
+
+    class Meta:
+        unique_together = ('community', 'candidate')
+        verbose_name_plural = "Wyniki kandydatów"
