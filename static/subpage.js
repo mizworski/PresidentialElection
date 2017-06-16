@@ -176,9 +176,13 @@ function submitUpdate(generalInfo, candidatesResults, resultsDetailed) {
     var updateRequest = new XMLHttpRequest();
     var token = localStorage.getItem('token');
     var token_header = 'Token ' + token;
+    var csrftoken = Cookies.get('csrftoken');
 
     updateRequest.open("POST", "/api/update");
     updateRequest.setRequestHeader("Authorization", token_header);
+    updateRequest.setRequestHeader("Content-Type", "application/json");
+    updateRequest.setRequestHeader('X-CSRFToken', csrftoken);
+
     updateRequest.send(JSON.stringify(updateData));
 
     updateRequest.addEventListener('load', function () {

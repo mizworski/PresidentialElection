@@ -77,7 +77,7 @@ def index(request, arg):
 @permission_classes((IsAuthenticated,))
 @csrf_exempt
 def update_community(request):
-    items = json.loads(request.body.decode("utf-8"))
+    items = request._data
 
     args = items['name'].split('_')
     comms = Community.objects.all().filter(name=args[0]).filter(ancestor__name=args[1])

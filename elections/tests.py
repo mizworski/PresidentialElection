@@ -1,4 +1,5 @@
 # coding=utf-8
+import time
 from django.test import TestCase
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -78,6 +79,8 @@ class TestCountry(TestCase):
         assert int(votes) == 1488
 
     def changeVotesNumber(self, driver):
+        time.sleep(1)  # tutaj mam problem, gdyż skrypt testujący
+        # odbiera jeszcze 'stare' wyniki, zanim nie zostaną podmienione.
         jkm_score = WebDriverWait(driver, 10). \
             until(EC.presence_of_element_located((By.NAME, 'Janusz KORWIN-MIKKE')))
 
