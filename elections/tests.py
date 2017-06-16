@@ -1,62 +1,92 @@
+# coding=utf-8
 from django.test import TestCase
-from elections.models import *
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
+from selenium import webdriver
 
 
 class TestCountry(TestCase):
-    def setUp(self):
-        province = Province.objects.create(name='Losowe')
-        province.save()
-        circ = Circuit.objects.create(ancestor=province, name='testowy okręg1', desc='dd okręg1')
-        circ.save()
-        c1 = Community.objects.create(ancestor=circ, name='2137',
-                                      votes_invalid=15,
-                                      votes_cast=300,
-                                      votes_valid=250,
-                                      entitled_to_vote=1000,
-                                      ballots_issued=310)
-        c1.save()
-        c2 = Community.objects.create(ancestor=circ, name='2138',
-                                      votes_invalid=152,
-                                      votes_cast=3002,
-                                      votes_valid=2502,
-                                      entitled_to_vote=10002,
-                                      ballots_issued=3102)
-        c2.save()
+    def testRegisterLogin(self):
+        driver = webdriver.Chrome()
+        self.register(driver)
+        self.login(driver)
+        self.openCommunitySubpage(driver)
+        self.validateVotesNumber(driver)
+        self.resetVotes(driver)
+        self.changeVotesNumber(driver)
+        driver.close()
 
-        cand1 = Candidate.objects.create(first_name='Janek', last_name='kmwtw')
-        cand1.save()
-        cand2 = Candidate.objects.create(first_name='Karol', last_name='Wu')
-        cand2.save()
+    def register(self, driver):
+        driver.get('http://localhost:8000')
+        logout_button = driver.find_element_by_id('logout_button')
+        logout_button.click()
+        register_link = driver.find_element_by_name('register')
+        register_link.click()
 
-        w1_1 = ResultsInCommunity.objects.create(community=c1, candidate=cand1, result=15)
-        w1_1.save()
-        w1_2 = ResultsInCommunity.objects.create(community=c2, candidate=cand1, result=400)
-        w1_2.save()
-        w2_1 = ResultsInCommunity.objects.create(community=c1, candidate=cand2, result=23)
-        w2_1.save()
-        w2_2 = ResultsInCommunity.objects.create(community=c2, candidate=cand2, result=417)
-        w2_2.save()
+        username_box = driver.find_element_by_name('username')
+        password_box = driver.find_element_by_name('password')
+        username_box.send_keys('testowy_uzytkownik_123')
+        password_box.send_keys('dupa123')
 
-    def sprawdz_wyniki(self, obj, JanekRes, KarolRes):
-        results = obj.results()
-        self.assertEquals(len(results), 2)
-        self.assertEquals({results[0].first_name, results[1].first_name}, {'Janek', 'Karol'})
-        for result in results:
-            if result.first_name == 'Janek':
-                self.assertEquals(result.result, JanekRes)
-            else:
-                self.assertEquals(result.result, KarolRes)
+        submit_button = driver.find_element_by_tag_name('button')
+        submit_button.click()
 
-    def ogolny_test(self, obj_class, name, JanekRes, KarolRes):
-        obj = obj_class.objects.filter(name=name)
-        self.assertEquals(len(obj), 1)
-        self.sprawdz_wyniki(obj[0], JanekRes, KarolRes)
+    def login(self, driver):
+        driver.get('http://localhost:8000')
+        login_link = driver.find_element_by_name('login')
+        login_link.click()
 
-    def test_gmina(self):
-        self.ogolny_test(Community, 2137, 15, 23)
+        username_box = driver.find_element_by_name('username')
+        password_box = driver.find_element_by_name('password')
+        username_box.send_keys('testowy_uzytkownik_123')
+        password_box.send_keys('dupa123')
+        submit_button = driver.find_element_by_tag_name('button')
+        submit_button.click()
 
-    def test_okreg(self):
-        self.ogolny_test(Circuit, 'testowy okręg1', 415, 440)
+    def openCommunitySubpage(self, driver):
+        province_link = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.PARTIAL_LINK_TEXT, 'MAŁOPOLSKIE')))
+        province_link.click()
+        circuit_link = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.PARTIAL_LINK_TEXT, 'Obwód25')))
+        circuit_link.click()
+        community_link = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.PARTIAL_LINK_TEXT, 'Piwniczna')))
+        community_link.click()
 
-    def test_wojewodztwo(self):
-        self.ogolny_test(Province, 'Losowe', 415, 440)
+    def validateVotesNumber(self, driver):
+        jkm_score = WebDriverWait(driver, 10). \
+            until(EC.presence_of_element_located((By.NAME, 'Janusz KORWIN-MIKKE')))
+
+        votes = jkm_score.get_attribute("value")
+        assert int(votes) >= 0
+
+    def resetVotes(self, driver):
+        jkm_score = WebDriverWait(driver, 10). \
+            until(EC.presence_of_element_located((By.NAME, 'Janusz KORWIN-MIKKE')))
+
+        jkm_score.clear()
+        jkm_score.send_keys('1488')
+        submit_button = driver.find_element_by_class_name('submit_button')
+        submit_button.click()
+
+        jkm_score = WebDriverWait(driver, 10). \
+            until(EC.presence_of_element_located((By.NAME, 'Janusz KORWIN-MIKKE')))
+        votes = jkm_score.get_attribute("value")
+        assert int(votes) == 1488
+
+    def changeVotesNumber(self, driver):
+        jkm_score = WebDriverWait(driver, 10). \
+            until(EC.presence_of_element_located((By.NAME, 'Janusz KORWIN-MIKKE')))
+
+        jkm_score.clear()
+        jkm_score.send_keys('476')
+        submit_button = driver.find_element_by_class_name('submit_button')
+        submit_button.click()
+
+        jkm_score = WebDriverWait(driver, 10). \
+            until(EC.presence_of_element_located((By.NAME, 'Janusz KORWIN-MIKKE')))
+        votes = jkm_score.get_attribute("value")
+        assert int(votes) == 476

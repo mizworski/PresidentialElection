@@ -266,11 +266,13 @@ function updateOnTokenStatusChange(right_box) {
         loginButton.appendChild(document.createElement('div'))
             .appendChild(document.createTextNode('login'));
         loginButton.href = '/login';
+        loginButton.name = 'login';
 
         var registerButton = document.createElement('a');
         registerButton.appendChild(document.createElement('div'))
             .appendChild(document.createTextNode('register'));
         registerButton.href = '/signup';
+        registerButton.name = 'register';
 
         right_box.appendChild(loginButton);
         right_box.appendChild(registerButton);
