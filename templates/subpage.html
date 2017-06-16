@@ -26,41 +26,39 @@
     <div id="right_box" class="side_box"></div>
 </header>
 <div id="tresc_wrapper">
-    <form method="POST">
-        {% csrf_token %}
-        <nav>
-            <h3>Powrót do strony głownej:
-                <a href="/">Polska</a>
-            </h3>
-        </nav>
-        <section id="wyniki_top">
-            <div id="wyniki_top_zbiorcze">
-                <div id="wyniki_top_zbiorcze_gora">
-                    <div>
-                        <h4>Zbiorcze statystyki głosowania</h4>
-                        <div id="zbiorcze_info"></div>
-                    </div>
+    {% csrf_token %}
+    <nav>
+        <h3>Powrót do strony głownej:
+            <a href="/">Polska</a>
+        </h3>
+    </nav>
+    <section id="wyniki_top">
+        <div id="wyniki_top_zbiorcze">
+            <div id="wyniki_top_zbiorcze_gora">
+                <div>
+                    <h4>Zbiorcze statystyki głosowania</h4>
+                    <div id="zbiorcze_info"></div>
                 </div>
             </div>
+        </div>
 
-        </section>
-        <div class="button_box"></div>
+    </section>
+    <div class="button_box"></div>
 
-        <section id="wyniki_ogolne">
-            <h3>Wyniki wyborów</h3>
-            <div id="wyniki_ogolne_tabela">
-                <table class="wyniki" id="wyniki_ogolne_zawartosc"></table>
-            </div>
-        </section>
+    <section id="wyniki_ogolne">
+        <h3>Wyniki wyborów</h3>
+        <div id="wyniki_ogolne_tabela">
+            <table class="wyniki" id="wyniki_ogolne_zawartosc"></table>
+        </div>
+    </section>
 
-        <section id="wyniki_szczegolowe">
-            <div id="wyniki_szczegolowe_tabela">
-                <table class="wyniki" id="wyniki_szczegolowe_zawartosc"></table>
-            </div>
-        </section>
+    <section id="wyniki_szczegolowe">
+        <div id="wyniki_szczegolowe_tabela">
+            <table class="wyniki" id="wyniki_szczegolowe_zawartosc"></table>
+        </div>
+    </section>
 
-        <div class="button_box"></div>
-    </form>
+    <div class="button_box"></div>
 </div>
 </body>
 </html>

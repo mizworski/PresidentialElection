@@ -165,11 +165,27 @@ function submitUpdate(generalInfo, candidatesResults, resultsDetailed) {
 
     var updateData = {'name': unitName};
 
+    /// uprawnionych < kart ważnych
+    if (generalInfoInputs[0].value < generalInfoInputs[1].value) {
+        return;
+    }
+
+    /// kart waznych < glosow waznych + glosow niewaznych
+    if (generalInfoInputs[1].value < generalInfoInputs[2].value + generalInfoInputs[3].value) {
+        return
+    }
+
     for (var i = 0; i < generalInfoInputs.length; ++i) {
+        if (generalInfoInputs[i].value < 0) {
+            return;
+        }
         updateData[generalInfoInputs[i].name] = generalInfoInputs[i].value
     }
 
     for (var j = 0; j < candidatesResultsInputs.length; ++j) {
+        if (candidatesResultsInputs[j].value < 0) {
+            return;
+        }
         updateData[candidatesResultsInputs[j].name] = candidatesResultsInputs[j].value
     }
 

@@ -1,20 +1,3 @@
-// using jQuery
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i];
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
 function addCandidatesResults(serializedData, candidatesResults) {
     while (candidatesResults.children.length !== 0) {
         candidatesResults.removeChild(candidatesResults.firstChild);
@@ -176,25 +159,51 @@ function addDetailedInfo(serializedData, detailedInfo) {
 }
 
 
-function submitUpdate(generalInfo, candidatesResults) {
+function submitUpdate(generalInfo, candidatesResults, resultsDetailed) {
     var generalInfoInputs = generalInfo.getElementsByTagName('input');
     var candidatesResultsInputs = candidatesResults.getElementsByTagName('input');
 
     var updateData = {'name': unitName};
 
+    /// uprawnionych < kart ważnych
+    if (generalInfoInputs[0].value < generalInfoInputs[1].value) {
+        return;
+    }
+
+    /// kart waznych < glosow waznych + glosow niewaznych
+    if (generalInfoInputs[1].value < generalInfoInputs[2].value + generalInfoInputs[3].value) {
+        return
+    }
+
     for (var i = 0; i < generalInfoInputs.length; ++i) {
+        if (generalInfoInputs[i].value < 0) {
+            return;
+        }
         updateData[generalInfoInputs[i].name] = generalInfoInputs[i].value
     }
 
     for (var j = 0; j < candidatesResultsInputs.length; ++j) {
+        if (candidatesResultsInputs[j].value < 0) {
+            return;
+        }
         updateData[candidatesResultsInputs[j].name] = candidatesResultsInputs[j].value
     }
 
     var updateRequest = new XMLHttpRequest();
-
+    var token = localStorage.getItem('token');
+    var token_header = 'Token ' + token;
+    var csrftoken = Cookies.get('csrftoken');
 
     updateRequest.open("POST", "/api/update");
+    updateRequest.setRequestHeader("Authorization", token_header);
+    updateRequest.setRequestHeader("Content-Type", "application/json");
+    updateRequest.setRequestHeader('X-CSRFToken', csrftoken);
+
     updateRequest.send(JSON.stringify(updateData));
+
+    updateRequest.addEventListener('load', function () {
+        reload(generalInfo, candidatesResults, resultsDetailed)
+    })
 }
 
 function reload(generalInfo, candidatesResults, resultsDetailed) {
@@ -247,7 +256,7 @@ function reload(generalInfo, candidatesResults, resultsDetailed) {
     }
 }
 
-function updateNavBar(right_box) {
+function updateOnTokenStatusChange(right_box) {
     var token = localStorage.getItem('token');
 
     if (token !== '') {
@@ -255,19 +264,20 @@ function updateNavBar(right_box) {
         var logoutButton = document.createElement('button');
         logoutButton.type = 'button';
         logoutButton.id = 'logout_button';
-        logoutButton.innerHTML = 'wyloguj się';
+        logoutButton.innerHTML = 'logout';
 
         right_box.appendChild(document.createElement('div'))
             .appendChild(logoutButton);
 
         logoutButton.addEventListener('click', function () {
             localStorage.setItem('token', '');
-            updateNavBar(right_box);
+            updateOnTokenStatusChange(right_box);
             if (isCommunity === 'True') {
                 var generalInfo = document.getElementById("zbiorcze_info");
                 var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
                 var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
                 reload(generalInfo, candidatesResults, resultsDetailed);
+                addSubmitButtons(generalInfo, candidatesResults, resultsDetailed);
             }
         });
     } else {
@@ -276,16 +286,42 @@ function updateNavBar(right_box) {
         loginButton.appendChild(document.createElement('div'))
             .appendChild(document.createTextNode('login'));
         loginButton.href = '/login';
+        loginButton.name = 'login';
 
         var registerButton = document.createElement('a');
         registerButton.appendChild(document.createElement('div'))
             .appendChild(document.createTextNode('register'));
         registerButton.href = '/signup';
+        registerButton.name = 'register';
 
         right_box.appendChild(loginButton);
         right_box.appendChild(registerButton);
     }
 }
+
+function addSubmitButtons(generalInfo, candidatesResults, resultsDetailed) {
+    var token = localStorage.getItem('token');
+
+    var buttonBoxes = document.getElementsByClassName('button_box');
+
+    if (token !== '') {
+        for (var i = 0; i < buttonBoxes.length; ++i) {
+            var button = document.createElement('button');
+            button.innerHTML = 'Wyślij';
+            button.type = 'button';
+            button.className = 'submit_button';
+            buttonBoxes[i].appendChild(button);
+            button.addEventListener('click', function () {
+                submitUpdate(generalInfo, candidatesResults, resultsDetailed);
+            })
+        }
+    } else {
+        for (var j = 0; j < buttonBoxes.length; ++j) {
+            buttonBoxes[j].innerHTML = ''
+        }
+    }
+}
+
 
 window.addEventListener("load", function () {
     var generalInfo = document.getElementById("zbiorcze_info");
@@ -294,34 +330,12 @@ window.addEventListener("load", function () {
 
     var right_box = document.getElementById('right_box');
 
-    updateNavBar(right_box);
+    updateOnTokenStatusChange(right_box);
 
     reload(generalInfo, candidatesResults, resultsDetailed);
 
-    // var buttons = document.getElementsByClassName('submit_button');
-    var token = localStorage.getItem('token');
-
-    var buttonBoxes = document.getElementsByClassName('button_box');
-
-
-    for (var i = 0; i < buttonBoxes.length; ++i) {
-        var button = document.createElement('button');
-        button.class = 'submit_button';
-        button.type = 'button';
-        button.innerHTML = 'Wyślij';
-        buttonBoxes[i].appendChild(button);
-        button.addEventListener('click', function () {
-            submitUpdate(generalInfo, candidatesResults);
-            setTimeout(reload(generalInfo, candidatesResults, resultsDetailed), 3000);
-        })
+    if (isCommunity === 'True') {
+        addSubmitButtons(generalInfo, candidatesResults, resultsDetailed);
     }
-
-    // for (var i = 0; i < buttons.length; ++i) {
-    //     buttons[i].addEventListener('click', function () {
-    //         submitUpdate(generalInfo, candidatesResults);
-    //         setTimeout(reload(generalInfo, candidatesResults, resultsDetailed), 3000);
-    //     })
-    // }
-
 
 });
