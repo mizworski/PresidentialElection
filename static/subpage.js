@@ -259,7 +259,7 @@ function reload(generalInfo, candidatesResults, resultsDetailed, unitName, isCom
     }
 }
 
-function updateOnTokenStatusChange(right_box) {
+function updateOnTokenStatusChange(right_box, unitName, isCommunity) {
     var token = localStorage.getItem('token');
 
     if (token !== '') {
@@ -279,7 +279,7 @@ function updateOnTokenStatusChange(right_box) {
                 var generalInfo = document.getElementById("zbiorcze_info");
                 var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
                 var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
-                reload(generalInfo, candidatesResults, resultsDetailed);
+                reload(generalInfo, candidatesResults, resultsDetailed, unitName, isCommunity);
                 addSubmitButtons(generalInfo, candidatesResults, resultsDetailed);
             }
         });
@@ -372,7 +372,7 @@ window.addEventListener("load", function () {
 
     var right_box = document.getElementById('right_box');
 
-    updateOnTokenStatusChange(right_box);
+    updateOnTokenStatusChange(right_box, unitName, isCommunity);
 
     reload(generalInfo, candidatesResults, resultsDetailed, unitName, isCommunity);
 
