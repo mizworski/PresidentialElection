@@ -1,3 +1,6 @@
+var unitName = '';
+var isCommunity = false;
+
 function addCandidatesResults(serializedData, candidatesResults) {
     while (candidatesResults.children.length !== 0) {
         candidatesResults.removeChild(candidatesResults.firstChild);
@@ -29,7 +32,7 @@ function addCandidatesResults(serializedData, candidatesResults) {
             .appendChild(document.createTextNode(candidate[0]));
 
 
-        if (token !== '' && isCommunity === 'True') {
+        if (token !== '' && isCommunity === 'true') {
             var input_wrapper = document.createElement('div');
             var inputField = document.createElement('input');
             inputField.name = candidate[0];
@@ -90,7 +93,7 @@ function addGeneralInfo(serializedData, generalInfo) {
         label_wrapper.innerHTML = label;
         row_wrapper.appendChild(label_wrapper);
 
-        if (token !== '' && isCommunity === 'True') {
+        if (token !== '' && isCommunity === 'true') {
             var value_wrapper = document.createElement('div');
             var inputField = document.createElement('input');
             inputField.name = row['short'];
@@ -159,7 +162,7 @@ function addDetailedInfo(serializedData, detailedInfo) {
 }
 
 
-function submitUpdate(generalInfo, candidatesResults, resultsDetailed) {
+function submitUpdate(generalInfo, candidatesResults, resultsDetailed, unitName) {
     var generalInfoInputs = generalInfo.getElementsByTagName('input');
     var candidatesResultsInputs = candidatesResults.getElementsByTagName('input');
 
@@ -202,11 +205,11 @@ function submitUpdate(generalInfo, candidatesResults, resultsDetailed) {
     updateRequest.send(JSON.stringify(updateData));
 
     updateRequest.addEventListener('load', function () {
-        reload(generalInfo, candidatesResults, resultsDetailed)
+        reload(generalInfo, candidatesResults, resultsDetailed, unitName, isCommunity)
     })
 }
 
-function reload(generalInfo, candidatesResults, resultsDetailed) {
+function reload(generalInfo, candidatesResults, resultsDetailed, unitName, isCommunity) {
 
     /// Candidates results
     var storedCandidatesResults = localStorage.getItem("candidates" + unitName);
@@ -239,7 +242,7 @@ function reload(generalInfo, candidatesResults, resultsDetailed) {
     generalInfoRequest.send();
 
     /// Detailed info
-    if (isCommunity === 'False') {
+    if (isCommunity === 'false') {
         var storedDetailedInfo = localStorage.getItem("detailed" + unitName);
         if (storedDetailedInfo !== null) {
             addDetailedInfo(storedDetailedInfo, resultsDetailed);
@@ -272,7 +275,7 @@ function updateOnTokenStatusChange(right_box) {
         logoutButton.addEventListener('click', function () {
             localStorage.setItem('token', '');
             updateOnTokenStatusChange(right_box);
-            if (isCommunity === 'True') {
+            if (isCommunity === 'true') {
                 var generalInfo = document.getElementById("zbiorcze_info");
                 var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
                 var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
@@ -299,7 +302,7 @@ function updateOnTokenStatusChange(right_box) {
     }
 }
 
-function addSubmitButtons(generalInfo, candidatesResults, resultsDetailed) {
+function addSubmitButtons(generalInfo, candidatesResults, resultsDetailed, unitName) {
     var token = localStorage.getItem('token');
 
     var buttonBoxes = document.getElementsByClassName('button_box');
@@ -312,7 +315,7 @@ function addSubmitButtons(generalInfo, candidatesResults, resultsDetailed) {
             button.className = 'submit_button';
             buttonBoxes[i].appendChild(button);
             button.addEventListener('click', function () {
-                submitUpdate(generalInfo, candidatesResults, resultsDetailed);
+                submitUpdate(generalInfo, candidatesResults, resultsDetailed, unitName);
             })
         }
     } else {
@@ -321,9 +324,48 @@ function addSubmitButtons(generalInfo, candidatesResults, resultsDetailed) {
         }
     }
 }
+function queryToDict(query) {
 
+    var arr = query.split("&");
+    var result = {};
+    for (i = 0; i < arr.length; i++) {
+        k = arr[i].split('=');
+        result[k[0].replace('?', '')] = (k[1] || '');
+    }
 
+    // console.log(result);
+    return result
+}
+
+function replacePolishChars(query) {
+    query = query.replace(/%C4%99/g, 'ę');
+    query = query.replace(/%C5%9A/g, 'Ś');
+    query = query.replace(/%C5%9B/g, 'ś');
+    query = query.replace(/%20/g, ' ');
+    query = query.replace(/%C3%B3/g, 'ó');
+    query = query.replace(/%C5%82/g, 'ł');
+    query = query.replace(/%C5%81/g, 'Ł');
+    query = query.replace(/%C4%85/g, 'ą');
+    query = query.replace(/%C5%84/g, 'ń');
+    query = query.replace(/%C4%87/g, 'ć');
+    query = query.replace(/%C4%86/g, 'Ć');
+    query = query.replace(/%C5%BA/g, 'ź');
+    query = query.replace(/%C5%BB/g, 'Ż');
+    query = query.replace(/%C5%BC/g, 'ż');
+    return query;
+}
 window.addEventListener("load", function () {
+    var query = document.location.search;
+    query = replacePolishChars(query);
+
+    if (query === '') {
+        unitName = '';
+        isCommunity = 'false';
+    } else {
+        var metadata = queryToDict(query);
+        unitName = metadata['name'];
+        isCommunity = metadata['is_community'];
+    }
     var generalInfo = document.getElementById("zbiorcze_info");
     var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
     var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");
@@ -332,10 +374,10 @@ window.addEventListener("load", function () {
 
     updateOnTokenStatusChange(right_box);
 
-    reload(generalInfo, candidatesResults, resultsDetailed);
+    reload(generalInfo, candidatesResults, resultsDetailed, unitName, isCommunity);
 
-    if (isCommunity === 'True') {
-        addSubmitButtons(generalInfo, candidatesResults, resultsDetailed);
+    if (isCommunity === 'true') {
+        addSubmitButtons(generalInfo, candidatesResults, resultsDetailed, unitName);
     }
 
 });

@@ -19,11 +19,12 @@ import elections.views
 from rest_framework.authtoken import views
 
 urlpatterns = [
-    url(r'^$', elections.views.index, kwargs={'arg': ''}),
+    url(r'^$', elections.views.index),
     url(r'^login/', elections.views.get_login_page),
     url(r'^signup/', elections.views.get_signup_page),
     url(r'^logout/', elections.views.process_logout),
     url(r'^search/', elections.views.process_search),
+    url(r'^search/?name*', elections.views.index),
     url(r'^wyniki/Obwód(0)?(?P<arg>.*)', elections.views.index),
     url(r'^wyniki/(?P<arg>.*)', elections.views.index),
 

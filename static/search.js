@@ -28,6 +28,7 @@ function addDetailedInfo(serializedData, detailedInfo) {
         var unit_name_column = document.createElement("td");
         var unit_name_link = document.createElement("a");
         unit_name_link.href = electoral_unit_results[0];
+        unit_name_link.pathname = "";
         unit_name_link.innerHTML = electoral_unit_results[1];
         unit_name_column.appendChild(unit_name_link);
         table_row.appendChild(unit_name_column);

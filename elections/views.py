@@ -57,20 +57,9 @@ def process_search(request):
 
 
 # noinspection PyArgumentList
-def index(request, arg):
-    arg = arg.replace('.html', '')
-    metadata = {'name': arg}
-
-    is_logged = request.user.is_authenticated()
-    if '_' in arg:
-        is_community = True
-    else:
-        is_community = False
-
-    metadata.update(czy_zalogowany=is_logged, czy_gmina=is_community)
-
-    return render(request, "subpage.html", metadata)
-
+def index(request):
+    return render(request, "static.html", {})
+    # return redirect('static.html')
 
 @api_view(['POST'])
 @authentication_classes((SessionAuthentication, TokenAuthentication))
@@ -294,10 +283,12 @@ def get_detailed_info(request, arg):
         if descendant.name.isdigit():
             name = 'Obwód' + name
 
-        href = '/wyniki/' + name_to_href(name)
+        href = '?name=' + name_to_href(name)
 
         if unit_type == Circuit:
-            href += '_' + descendant.ancestor.name
+            href += '_' + descendant.ancestor.name + '&is_community=true'
+        else:
+            href += '&is_community=false'
 
         desc_data = [href, name, descendant.general()['votes_valid']]
         for res in desc_res:
@@ -344,7 +335,9 @@ def get_search_results(request, arg):
         desc_res = comm.results()
         name = comm.name
 
-        href = '/wyniki/' + name_to_href(name) + '_' + comm.ancestor.name
+        href = '?name=' + name_to_href(name)
+        href += '_' + comm.ancestor.name + '&is_community=true'
+
         desc_data = [href, name, comm.general()['votes_valid']]
         for res in desc_res:
             votes = res.result

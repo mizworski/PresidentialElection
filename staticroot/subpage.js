@@ -324,6 +324,12 @@ function addSubmitButtons(generalInfo, candidatesResults, resultsDetailed) {
 
 
 window.addEventListener("load", function () {
+    var unitName = "dupa";
+    var isCommunity = false;
+    var query = document.location.search;
+
+    var unitName = query;
+
     var generalInfo = document.getElementById("zbiorcze_info");
     var candidatesResults = document.getElementById("wyniki_ogolne_zawartosc");
     var resultsDetailed = document.getElementById("wyniki_szczegolowe_zawartosc");

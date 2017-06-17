@@ -406,7 +406,7 @@ table thead th.sorted .sortoptions a.descending:hover {
 
 /* FORM DEFAULTS */
 
-input, textarea, select, .form-row p, form .submit_button {
+input, textarea, select, .form-row p, form .button {
     margin: 2px 0;
     padding: 2px 3px;
     vertical-align: middle;
@@ -446,7 +446,7 @@ select[multiple] {
 
 /* FORM BUTTONS */
 
-.submit_button, input[type=submit], input[type=button], .submit-row input, a.submit_button {
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
     background: #79aec8;
     padding: 10px 15px;
     border: none;
@@ -455,34 +455,34 @@ select[multiple] {
     cursor: pointer;
 }
 
-a.submit_button {
+a.button {
     padding: 4px 5px;
 }
 
-.submit_button:active, input[type=submit]:active, input[type=button]:active,
-.submit_button:focus, input[type=submit]:focus, input[type=button]:focus,
-.submit_button:hover, input[type=submit]:hover, input[type=button]:hover {
+.button:active, input[type=submit]:active, input[type=button]:active,
+.button:focus, input[type=submit]:focus, input[type=button]:focus,
+.button:hover, input[type=submit]:hover, input[type=button]:hover {
     background: #609ab6;
 }
 
-.submit_button[disabled], input[type=submit][disabled], input[type=button][disabled] {
+.button[disabled], input[type=submit][disabled], input[type=button][disabled] {
     opacity: 0.4;
 }
 
-.submit_button.default, input[type=submit].default, .submit-row input.default {
+.button.default, input[type=submit].default, .submit-row input.default {
     float: right;
     border: none;
     font-weight: 400;
     background: #417690;
 }
 
-.submit_button.default:active, input[type=submit].default:active,
-.submit_button.default:focus, input[type=submit].default:focus,
-.submit_button.default:hover, input[type=submit].default:hover {
+.button.default:active, input[type=submit].default:active,
+.button.default:focus, input[type=submit].default:focus,
+.button.default:hover, input[type=submit].default:hover {
     background: #205067;
 }
 
-.submit_button[disabled].default,
+.button[disabled].default,
 input[type=submit][disabled].default,
 input[type=button][disabled].default {
     opacity: 0.4;
