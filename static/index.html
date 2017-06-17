@@ -1,16 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-{#    <meta charset="UTF-8">#}
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    {% load static %}
-    <link href="{% static 'style.css' %}" rel="stylesheet" type="text/css">
+    <meta charset="UTF-8">
+    <link href="/static/style.css" rel="stylesheet" type="text/css">
     <title>Wybory Prezydenta 2000</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript">
-        unitName = '{{ name }}';
-        isCommunity = '{{ czy_gmina }}'
-    </script>
     <script type="text/javascript" src="/static/subpage.js"></script>
     <script type="text/javascript" src="/static/js.cookie.js"></script>
 </head>
@@ -27,7 +21,6 @@
     <div id="right_box" class="side_box"></div>
 </header>
 <div id="tresc_wrapper">
-    {% csrf_token %}
     <nav>
         <h3>Powrót do strony głownej:
             <a href="/">Polska</a>

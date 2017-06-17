@@ -17,16 +17,13 @@ from django.conf.urls import url
 from django.contrib import admin
 import elections.views
 from rest_framework.authtoken import views
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    url(r'^$', elections.views.index),
-    url(r'^login/', elections.views.get_login_page),
-    url(r'^signup/', elections.views.get_signup_page),
-    url(r'^logout/', elections.views.process_logout),
-    url(r'^search/', elections.views.process_search),
-    url(r'^search/?name*', elections.views.index),
-    url(r'^wyniki/Obwód(0)?(?P<arg>.*)', elections.views.index),
-    url(r'^wyniki/(?P<arg>.*)', elections.views.index),
+    url(r'^$', RedirectView.as_view(url="/static/index.html")),
+    url(r'^login/', RedirectView.as_view(url="/static/login.html")),
+    url(r'^signup/', RedirectView.as_view(url="/static/signup.html")),
+    url(r'^search/', RedirectView.as_view(url="/static/search.html")),
 
     url(r'^api/kandydaci/Obwód(0)?(?P<arg>.*)', elections.views.get_candidates_info),
     url(r'^api/kandydaci/(?P<arg>.*)', elections.views.get_candidates_info),

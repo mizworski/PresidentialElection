@@ -13,11 +13,10 @@ function submitForm(loginRequest) {
 }
 
 function processResponse(serializedData) {
-    var requestPath = document.getElementById('request_path');
     var data = JSON.parse(serializedData);
     if (data['status'] === 'success') {
         localStorage.setItem("token", data['token']);
-        window.location.replace(requestPath.value);
+        window.location.replace('/static/index.html');
     } else {
         var msgBox = document.getElementById('message_box');
         msgBox.innerHTML = data['message']

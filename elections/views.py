@@ -1,18 +1,14 @@
 import json
-import jwt
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
-from django.shortcuts import render, redirect
+
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from elections.models import *
-from elections.my_forms import *
-from django.views.decorators.csrf import csrf_exempt
-
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from rest_framework.authtoken.views import obtain_auth_token
 
 poziomy = ["province", "circuit", "community", ""]
 poziomy_id = ["province_id", "circuit_id", "community_id", ""]
@@ -45,21 +41,6 @@ def name_to_href(str):
 
     return str
 
-
-def process_search(request):
-    data = {
-        'input_value': '',
-        'query_sent': False,
-        'czy_zalogowany': request.user.is_authenticated()
-    }
-
-    return render(request, "search.html", data)
-
-
-# noinspection PyArgumentList
-def index(request):
-    return render(request, "static.html", {})
-    # return redirect('static.html')
 
 @api_view(['POST'])
 @authentication_classes((SessionAuthentication, TokenAuthentication))
@@ -103,16 +84,6 @@ def update_community(request):
     return HttpResponse(status=200)
 
 
-def get_login_page(request):
-    form = LoginForm()
-    data = {
-        'form': form,
-        'msg': '',
-        'request_path': request.META.get('HTTP_REFERER', '/')
-    }
-    return render(request, 'login.html', data)
-
-
 @csrf_exempt
 def process_login(request):
     items = json.loads(request.body.decode("utf-8"))
@@ -137,16 +108,6 @@ def process_login(request):
     return JsonResponse(result, safe=False)
 
 
-def get_signup_page(request):
-    form = RegisterForm()
-    data = {
-        'form': form,
-        'msg': '',
-        'request_path': request.META.get('HTTP_REFERER', '/')
-    }
-    return render(request, 'signup.html', data)
-
-
 @csrf_exempt
 def process_signup(request):
     items = json.loads(request.body.decode("utf-8"))
@@ -163,20 +124,15 @@ def process_signup(request):
 
     user = User.objects.create_user(username, password=password)
     user.save()
-    # login(request, user)
 
     token = Token.objects.get_or_create(user=user)
+    token = token[0]
 
     result = {
         'status': 'success',
         'token': token.key
     }
     return JsonResponse(result, safe=False)
-
-
-def process_logout(request):
-    logout(request)
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 
 def get_electoral_unit(name):
@@ -313,8 +269,7 @@ def get_detailed_info(request, arg):
 
 def get_search_results(request, arg):
     if arg is '':
-        data = {'is_logged': request.user.is_authenticated()}
-        return JsonResponse(data, safe=False)
+        return JsonResponse({}, safe=False)
 
     cand_names = []
 
@@ -347,8 +302,7 @@ def get_search_results(request, arg):
 
     data = {
         'labels': labels,
-        'detailed_results': sorted(detailed_results, key=lambda x: x[1]),
-        'is_logged': request.user.is_authenticated()
+        'detailed_results': sorted(detailed_results, key=lambda x: x[1])
     }
 
     return JsonResponse(data, safe=False)

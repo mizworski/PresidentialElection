@@ -2,20 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    {% load static %}
-    <link href="{% static 'form.css' %}" rel="stylesheet" type="text/css">
-    <title>Rejestracja</title>
+    <link href="/static/form.css" rel="stylesheet" type="text/css">
+    <title>Logowanie</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="/static/register.js"></script>
+    <script type="text/javascript" src="/static/login.js"></script>
 </head>
 <body>
 
 <div id="wrapper">
     <div id="box">
-        <h1 class="header">Register</h1>
-        <form id="login_form" method="POST" action="">
-            {% csrf_token %}
-            <input type="hidden" name="request_path" value="{{ request_path }}" id="request_path">
+        <h1 class="header">Login</h1>
+        <form method="post" action="">
             <input name="username"
                    placeholder="username"
                    type="text"
@@ -28,12 +25,11 @@
                    class="input"
                    required
                    id="password"/>
-            <button class="submit_button" type="button">Submit</button>
+            <button class="submit_button" type="button">Login</button>
         </form>
-        <a href="../login">Login</a>
+        <a href="../signup">Register</a>
 
-        <div class="uwaga" id="message_box">{{ msg }}</div>
-
+        <div class="uwaga" id="message_box"></div>
     </div>
 </div>
 </body>
